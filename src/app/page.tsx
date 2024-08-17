@@ -1,4 +1,5 @@
 import MaxWithWrapper from "@/components/MaxWithWrapper";
+import Navbar from "@/components/Navbar";
 import { buttonVariants } from "@/components/ui/button";
 import { ArrowBigRight } from "lucide-react";
 import Image from "next/image";
@@ -7,9 +8,10 @@ import Link from "next/link";
 export default function Home() {
   return (
     <>
-      <MaxWithWrapper className="mb-12 mt-28 sm:mt-40 flex flex-col items-center justify-center text-center">
+      <Navbar />
+      <MaxWithWrapper className="mb-12 mt-28 sm:mt-32 flex flex-col items-center justify-center text-center">
         <div
-          className="mb-12 mt-28 sm:mt-40 flex flex-col items-center justify-center text-center'>
+          className="mb-12 mt-28 sm:mt-32 flex flex-col items-center justify-center text-center'>
         <div className='mx-auto mb-4 flex max-w-fit items-center justify-center space-x-2 overflow-hidden rounded-full border border-gray-200 bg-white px-7 py-2 shadow-md backdrop-blur transition-all hover:border-gray-300 hover:bg-white/50'>
           <p className='text-sm font-semibold text-gray-700"
         >
