@@ -21,7 +21,7 @@ export default function UploadButton() {
         }}
         asChild
       >
-        <Button>Upload PDF</Button>
+        <Button>Cargar archivo</Button>
       </DialogTrigger>
 
       <DialogContent>Example</DialogContent>

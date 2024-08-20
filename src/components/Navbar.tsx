@@ -11,36 +11,28 @@ const Navbar = () => {
       <MaxWithWrapper>
         <div className="flex h-14 items-center justify-between border-b border-zinc-200">
           <Link href="/" className="flex z-40 font-semibold">
-            <span>Brief.</span>
+            <span>Logo.</span>
           </Link>
 
           {/*todo: mobile navbar */}
 
           <div className="hidden items-center space-x-4 sm:flex">
             <>
-              <Link
-                href="/pricing"
-                className={buttonVariants({
-                  variant: "ghost",
-                  size: "sm",
-                })}
-              >
-                Pricing
-              </Link>
               <LoginLink
                 className={buttonVariants({
                   variant: "ghost",
                   size: "sm",
                 })}
               >
-                Sign in
+                Iniciar sesión
               </LoginLink>
               <RegisterLink
                 className={buttonVariants({
                   size: "sm",
                 })}
               >
-                Get started <ArrowRight className="ml-1.5 h-5 w-5" />
+                Registrarse
+                <ArrowRight className="ml-1.5 h-5 w-5" />
               </RegisterLink>
             </>
           </div>
