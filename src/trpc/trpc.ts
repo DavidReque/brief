@@ -1,3 +1,4 @@
+import { db } from "@/db";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { initTRPC, TRPCError } from "@trpc/server";
 
@@ -12,13 +13,22 @@ const isAuth = middleware(async (opts) => {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
 
+  // Obtener las áreas del usuario
+  const userAreas = await db.userArea.findMany({
+    where: { userId: user.id },
+    include: { area: true },
+  });
+
   return opts.next({
     ctx: {
       userId: user.id,
       user,
+      userAreas,
     },
   });
 });
+
+// middleware para verificar el acceso a un área específica
 
 export const router = t.router;
 export const publicProcedure = t.procedure;
