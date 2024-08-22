@@ -8,18 +8,25 @@ import Dropzone from "react-dropzone";
 import { Cloud, File, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Progress } from "./ui/progress";
+import { useUploadThing } from "@/lib/uploadthing";
+import { useToast } from "./ui/use-toast";
 
 const UploadDropzone = () => {
   const router = useRouter();
 
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
+  const { toast } = useToast();
+
+  const { startUpload } = useUploadThing("fileUploader");
 
   const startSimulatedProgress = () => {
     setUploadProgress(0);
 
+    // setInterval para incrementar el progreso cada 500ms.
     const interval = setInterval(() => {
       setUploadProgress((prevProgress) => {
+        // Si el progreso alcanza el 95%, el intervalo se limpia para detener la simulación.
         if (prevProgress >= 95) {
           clearInterval(interval);
           return prevProgress;
@@ -32,12 +39,24 @@ const UploadDropzone = () => {
   };
 
   return (
+    // Dropzone: Se utiliza para crear una zona donde los usuarios pueden arrastrar y
+    // soltar archivos, o hacer clic para seleccionar un archivo
     <Dropzone
       multiple={false}
-      onDrop={(acceptedFile) => {
+      onDrop={async (acceptedFile) => {
         setIsUploading(true);
 
         const progressInterval = startSimulatedProgress();
+
+        const res = await startUpload(acceptedFile);
+
+        if (!res) {
+          return toast({
+            title: "Algo salio mal",
+            description: "Por favor intenta de nuevo mas tarde",
+            variant: "destructive",
+          });
+        }
 
         clearInterval(progressInterval);
         setUploadProgress(100);
@@ -61,6 +80,7 @@ const UploadDropzone = () => {
                 </p>
               </div>
 
+              {/*Si hay un archivo aceptado (acceptedFiles), se muestra su nombre.*/}
               {acceptedFiles && acceptedFiles[0] ? (
                 <div className="max-w-xs bg-white flex items-center rounded-md overflow-hidden outline outline-[1px] outline-zinc-200 divide-x divide-zinc-200">
                   <div className="px-3 py-2 h-full grid place-items-center">
