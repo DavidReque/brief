@@ -10,15 +10,28 @@ import { useRouter } from "next/navigation";
 import { Progress } from "./ui/progress";
 import { useUploadThing } from "@/lib/uploadthing";
 import { useToast } from "./ui/use-toast";
+import { trpc } from "@/app/_trpc/client";
 
 const UploadDropzone = () => {
   const router = useRouter();
 
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
+  const [selectedArea, setSelectedArea] = useState<string>("");
   const { toast } = useToast();
 
   const { startUpload } = useUploadThing("fileUploader");
+
+  // Obtener las áreas del usuario
+  const { data: areas } = trpc.getUserAreas.useQuery();
+
+  const { mutate: startPolling } = trpc.getFile.useMutation({
+    onSuccess(file) {
+      router.push(`/dashboard/${file.id}`);
+    },
+    retry: true,
+    retryDelay: 500,
+  });
 
   const startSimulatedProgress = () => {
     setUploadProgress(0);
@@ -58,8 +71,22 @@ const UploadDropzone = () => {
           });
         }
 
+        const [fileResponse] = res;
+
+        const key = fileResponse?.key;
+
+        if (!key) {
+          return toast({
+            title: "Algo salio mal",
+            description: "Por favor intenta de nuevo mas tarde",
+            variant: "destructive",
+          });
+        }
+
         clearInterval(progressInterval);
         setUploadProgress(100);
+
+        startPolling({ key });
       }}
     >
       {({ getRootProps, getInputProps, acceptedFiles }) => (
@@ -104,9 +131,29 @@ const UploadDropzone = () => {
                       Redirigiendo...
                     </div>
                   ) : null}
+
+                  <input
+                    {...getInputProps()}
+                    type="file"
+                    id="dropzone-file"
+                    className="hidden"
+                  />
                 </div>
               ) : null}
             </label>
+
+            <select
+              value={selectedArea}
+              onChange={(e) => setSelectedArea(e.target.value)}
+              className="mt-4 max-w-xs mx-auto bg-white border border-gray-300 rounded-md"
+            >
+              <option value="">Seleccionar área</option>
+              {areas?.map((area) => (
+                <option key={area.id} value={area.id}>
+                  {area.name}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
       )}

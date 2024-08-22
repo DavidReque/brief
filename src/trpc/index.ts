@@ -39,6 +39,45 @@ export const appRouter = router({
       },
     });
   }),
+  getUserAreas: privateProcedure.query(async ({ ctx }) => {
+    const { userId } = ctx;
+
+    const userAreas = await db.userArea.findMany({
+      where: { userId },
+      include: {
+        area: true, // Incluye la información del área asociada
+      },
+    });
+
+    if (!userAreas) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "No se encontraron áreas para este usuario.",
+      });
+    }
+
+    return userAreas.map(({ area }) => ({
+      id: area.id,
+      name: area.name,
+      description: area.description,
+    }));
+  }),
+  getFile: privateProcedure
+    .input(z.object({ key: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const { userId } = ctx;
+
+      const file = await db.file.findFirst({
+        where: {
+          key: input.key,
+          userId,
+        },
+      });
+
+      if (!file) throw new TRPCError({ code: "NOT_FOUND" });
+
+      return file;
+    }),
   deleteFile: privateProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
