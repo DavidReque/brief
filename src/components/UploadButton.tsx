@@ -11,6 +11,13 @@ import { Progress } from "./ui/progress";
 import { useUploadThing } from "@/lib/uploadthing";
 import { useToast } from "./ui/use-toast";
 import { trpc } from "@/app/_trpc/client";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
 
 const UploadDropzone = () => {
   const router = useRouter();
@@ -141,19 +148,27 @@ const UploadDropzone = () => {
                 </div>
               ) : null}
             </label>
+          </div>
 
-            <select
+          <div className="my-6">
+            <Select
               value={selectedArea}
-              onChange={(e) => setSelectedArea(e.target.value)}
-              className="mt-4 max-w-xs mx-auto bg-white border border-gray-300 rounded-md"
+              onValueChange={(value) => setSelectedArea(value)}
             >
-              <option value="">Seleccionar área</option>
-              {areas?.map((area) => (
-                <option key={area.id} value={area.id}>
-                  {area.name}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger className="w-full bg-white border border-gray-300 rounded-md">
+                <SelectValue placeholder="Seleccionar área" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Seleccionar área">
+                  Seleccionar área
+                </SelectItem>
+                {areas?.map((area) => (
+                  <SelectItem key={area.id} value={area.id}>
+                    {area.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
       )}
@@ -181,7 +196,7 @@ export default function UploadButton() {
         <Button>Cargar archivo</Button>
       </DialogTrigger>
 
-      <DialogContent>
+      <DialogContent className="h-96">
         <UploadDropzone />
       </DialogContent>
     </Dialog>
