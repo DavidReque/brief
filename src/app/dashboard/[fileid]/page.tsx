@@ -1,5 +1,5 @@
 import ChatWrapper from "@/components/ChatWrapper";
-import PdfRenderer from "@/components/PdfRenderer";
+import FileRenderer from "@/components/FileRenderer";
 import { db } from "@/db";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { notFound, redirect } from "next/navigation";
@@ -18,7 +18,7 @@ const Page = async ({ params }: PageProps) => {
 
   if (!user || !user.id) redirect(`/auth-callback?origin=dashboard/${fileid}`);
 
-  const file = db.file.findFirst({
+  const file = await db.file.findFirst({
     where: {
       id: fileid,
       userId: user.id,
@@ -34,7 +34,7 @@ const Page = async ({ params }: PageProps) => {
         <div className="flex-1 xl:flex">
           <div className="px-4 py-6 sm:px-6 lg:pl-8 xl:flex-1 xl:pl-6">
             {/* Main area */}
-            <PdfRenderer />
+            <FileRenderer url={file.url} />
           </div>
         </div>
 
