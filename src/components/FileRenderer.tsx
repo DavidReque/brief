@@ -1,18 +1,18 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { useToast } from "./ui/use-toast";
-import { useState, useEffect } from "react";
 
 interface FileRendererProps {
   url: string;
+  fileType: string;
 }
 
-const FileRenderer = ({ url }: FileRendererProps) => {
+const FileRenderer = ({ url, fileType }: FileRendererProps) => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const [useZoho, setUseZoho] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -20,49 +20,34 @@ const FileRenderer = ({ url }: FileRendererProps) => {
         setLoading(false);
         setError(true);
         toast({
-          title: "Error al cargar el archivo",
-          description:
-            "El archivo tardó demasiado en cargar. Intentando con Zoho Viewer...",
+          title: `Error al cargar el archivo ${fileType.toUpperCase()}`,
+          description: "El archivo tardó demasiado en cargar.",
           variant: "destructive",
         });
-        setUseZoho(true);
       }
     }, 10000); // 10 segundos de timeout
 
     return () => clearTimeout(timer);
-  }, [loading, toast]);
+  }, [loading, toast, fileType]);
 
   const handleLoad = () => {
     setLoading(false);
   };
 
-  const handleError = () => {
+  const handleError = (e: React.SyntheticEvent<HTMLIFrameElement, Event>) => {
     setLoading(false);
     setError(true);
-    if (!useZoho) {
-      toast({
-        title: "Error al cargar el archivo con Office 365",
-        description: "Intentando con Zoho Viewer...",
-        variant: "destructive",
-      });
-      setUseZoho(true);
-    } else {
-      toast({
-        title: "Error al cargar el archivo",
-        description:
-          "No se pudo cargar el archivo con ningún visor. Por favor, intenta nuevamente.",
-        variant: "destructive",
-      });
-    }
+    console.error("Error loading file:", e);
+    toast({
+      title: `Error al cargar el archivo ${fileType.toUpperCase()}`,
+      description:
+        "No se pudo cargar el archivo. Por favor, intenta nuevamente.",
+      variant: "destructive",
+    });
   };
 
   const getViewerUrl = () => {
-    if (useZoho) {
-      return `https://docs.zoho.com/officeapi/v1/viewer?url=${encodeURIComponent(
-        url
-      )}`;
-    } else if (!useZoho) {
-      // Office 365 viewer URL
+    if (fileType === "EXCEL" || fileType === "WORD") {
       return `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(
         url
       )}`;
@@ -74,7 +59,7 @@ const FileRenderer = ({ url }: FileRendererProps) => {
   };
 
   return (
-    <div className="w-full bg-white rounded-md shadow flex flex-col items-center h-[calc(100vh-3.5rem)]">
+    <div className="w-full h-[calc(100vh-3.5rem)] bg-white rounded-md shadow flex flex-col items-center">
       <div className="flex-1 w-full relative">
         {loading && !error && (
           <div className="absolute inset-0 flex justify-center items-center bg-white">
@@ -93,14 +78,7 @@ const FileRenderer = ({ url }: FileRendererProps) => {
             style={{ visibility: loading ? "hidden" : "visible" }}
           />
         )}
-        {error && !useZoho && (
-          <div className="flex justify-center items-center h-full">
-            <p className="text-yellow-600">
-              Intentando cargar con Zoho Viewer...
-            </p>
-          </div>
-        )}
-        {error && useZoho && (
+        {error && (
           <div className="flex justify-center items-center h-full">
             <p className="text-red-600">No se pudo cargar el archivo</p>
           </div>
