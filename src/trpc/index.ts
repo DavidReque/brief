@@ -4,6 +4,11 @@ import { TRPCError } from "@trpc/server";
 import { db } from "@/db";
 import { z } from "zod";
 
+const UserRole = {
+  ADMIN: "ADMIN",
+  MEMBER: "MEMBER",
+} as const;
+
 export const appRouter = router({
   authCallback: publicProcedure.query(async () => {
     const { getUser } = getKindeServerSession();
@@ -78,6 +83,7 @@ export const appRouter = router({
 
       return file;
     }),
+  // procedimiento para que eliminar archivo
   deleteFile: privateProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
@@ -102,6 +108,131 @@ export const appRouter = router({
 
       return file;
     }),
+  // procedimiento para que el ADMIN pueda crear un área
+  createArea: privateProcedure
+    .input(
+      z.object({
+        name: z.string(),
+        description: z.string().optional(),
+        userIds: z.array(z.string()),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { userId } = ctx;
+
+      // Verificar si el usuario es admin en alguna área
+      const isAdmin = await db.userArea.findFirst({
+        where: { userId, role: "ADMIN" },
+      });
+
+      if (!isAdmin) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "No tienes permiso para crear áreas",
+        });
+      }
+
+      const newArea = await db.area.create({
+        data: {
+          name: input.name,
+          description: input.description,
+          users: {
+            create: [
+              ...input.userIds.map((id) => ({
+                userId: id,
+                role: UserRole.MEMBER,
+              })),
+              {
+                userId,
+                role: UserRole.ADMIN,
+              },
+            ],
+          },
+        },
+      });
+
+      return newArea;
+    }),
+  //  procedimiento para agregar un usuario a un área
+  addUserToArea: privateProcedure
+    .input(
+      z.object({
+        areaId: z.string(),
+        userId: z.string(),
+        role: z.enum(["ADMIN", "MEMBER"]).optional().default("MEMBER"),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { userId } = ctx;
+
+      // Verificar si el usuario actual es admin del área
+      const isAdmin = await db.userArea.findFirst({
+        where: {
+          userId,
+          areaId: input.areaId,
+          role: "ADMIN",
+        },
+      });
+
+      if (!isAdmin) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "No tienes permiso para agregar usuarios a esta área",
+        });
+      }
+
+      const userArea = await db.userArea.create({
+        data: {
+          areaId: input.areaId,
+          userId: input.userId,
+          role: input.role,
+        },
+      });
+
+      return userArea;
+    }),
+  //  procedimiento para eliminar un área
+  deleteArea: privateProcedure
+    .input(
+      z.object({
+        areaId: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { userId } = ctx;
+
+      // Verificar si el usuario es admin del área
+      const isAdmin = await db.userArea.findFirst({
+        where: { userId, areaId: input.areaId, role: "ADMIN" },
+      });
+
+      if (!isAdmin) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "No tienes permiso para eliminar esta área",
+        });
+      }
+
+      await db.area.delete({
+        where: { id: input.areaId },
+      });
+
+      return { succes: true };
+    }),
+  getAllUsers: privateProcedure.query(async ({ ctx }) => {
+    // verifica que el usuario esté autenticado
+    const { userId } = ctx;
+
+    // Recupera todos los usuarios de la base de datos
+    const users = db.user.findMany({
+      select: {
+        id: true,
+        email: true,
+      },
+    });
+
+    return users;
+  }),
 });
 
 export type AppRouter = typeof appRouter;
