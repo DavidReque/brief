@@ -2,26 +2,33 @@
 
 import { trpc } from "@/app/_trpc/client";
 import UploadButton from "./UploadButton";
-import { Ghost, Loader2, MessageSquare, Plus, Trash } from "lucide-react";
+import { Ghost, Loader2, Plus, Trash, User } from "lucide-react";
 import Skeleton from "react-loading-skeleton";
 import Link from "next/link";
 import { format } from "date-fns";
 import { Button } from "./ui/button";
 import { useState } from "react";
+import { LogoutLink } from "@kinde-oss/kinde-auth-nextjs/components";
 import SideBar from "./SideBar";
 
-const Dashboard = () => {
+interface AreaDashboardProps {
+  areaId: string;
+  areaName: string;
+}
+
+const AreaDashboard = ({ areaId, areaName }: AreaDashboardProps) => {
   const [currentlyDeletingFile, setCurrentlyDeletingFile] = useState<
     string | null
   >(null);
 
   const utils = trpc.useUtils();
 
-  const { data: files, isLoading } = trpc.getUserFiles.useQuery();
+  // Query para obtener los archivos de un área específica
+  const { data: files, isLoading } = trpc.getAreaFiles.useQuery({ areaId });
 
   const { mutate: deleteFile } = trpc.deleteFile.useMutation({
     onSuccess: () => {
-      utils.getUserFiles.invalidate();
+      utils.getAreaFiles.invalidate({ areaId });
     },
     onMutate({ id }) {
       setCurrentlyDeletingFile(id);
@@ -35,14 +42,15 @@ const Dashboard = () => {
     <div className="flex">
       <SideBar />
       <main className="flex-1 mx-auto max-w-7xl p-4 md:p-10">
-        <div className="mt-12 flex flex-col items-start justify-between gap-4 border-b border-gray-200 pb-5 sm:flex-row sm:items-center sm:gap-0">
-          <h1 className="mb-3 font-bold text-5xl text-gray-900">
-            Mis archivos
-          </h1>
-          <UploadButton />
+        <div className="mt-8 flex flex-col items-start justify-between gap-4 border-b border-gray-200 pb-5 sm:flex-row sm:items-center sm:gap-0">
+          <h1 className="mb-3 font-bold text-5xl text-gray-900">{areaName}</h1>
+          <div className="flex items-center gap-4">
+            <LogoutLink>Cerrar sesión</LogoutLink>
+            <UploadButton />
+          </div>
         </div>
 
-        {/* display all user files */}
+        {/* Mostrar todos los archivos del área */}
         {files && files.length !== 0 ? (
           <ul className="mt-8 grid grid-cols-1 gap-6 divide-y divide-zinc-200 md:grid-cols-2 lg:grid-cols-3">
             {files
@@ -78,23 +86,21 @@ const Dashboard = () => {
                       {format(new Date(file.createdAt), "MMM yyyy")}
                     </div>
 
-                    <div className="flex items-center gap-2">
-                      <MessageSquare className="h-4 w-4" />
-                      mocked
+                    <div className="flex items-center gap-2 col-span-2 justify-between">
+                      <User className="h-4 w-4" />
+                      <span className="truncate">{file.uploadedBy.email}</span>
+                      <Button
+                        onClick={() => deleteFile({ id: file.id })}
+                        size="sm"
+                        variant="destructive"
+                      >
+                        {currentlyDeletingFile === file.id ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Trash className="h-4 w-4" />
+                        )}
+                      </Button>
                     </div>
-
-                    <Button
-                      onClick={() => deleteFile({ id: file.id })}
-                      size="sm"
-                      className="w-full"
-                      variant="destructive"
-                    >
-                      {currentlyDeletingFile === file.id ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Trash className="h-4 w-4" />
-                      )}
-                    </Button>
                   </div>
                 </li>
               ))}
@@ -104,7 +110,7 @@ const Dashboard = () => {
         ) : (
           <div className="mt-16 flex flex-col items-center gap-2">
             <Ghost className="h-8 w-8 text-zinc-800" />
-            <h3 className="font-semibold text-xl">Muy vacio por aqui</h3>
+            <h3 className="font-semibold text-xl">Muy vacío por aquí</h3>
             <p>Carguemos un archivo</p>
           </div>
         )}
@@ -113,4 +119,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default AreaDashboard;

@@ -19,19 +19,6 @@ const Page = async ({ params }: PageProps) => {
     redirect("/login");
   }
 
-  // Verificar si el usuario tiene acceso como ADMIN al área
-  const isAdmin = await db.userArea.findFirst({
-    where: {
-      userId: user.id,
-      role: "ADMIN",
-      areaId: areaid, // Asegurar que sea admin de esta área específica
-    },
-  });
-
-  if (!isAdmin) {
-    redirect("/dashboard");
-  }
-
   // Recuperar el área y los archivos asociados, junto con la información del usuario
   const area = await db.area.findFirst({
     where: {

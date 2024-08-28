@@ -233,6 +233,63 @@ export const appRouter = router({
 
     return users;
   }),
+  getAreaFiles: privateProcedure
+    .input(z.object({ areaId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const { userId } = ctx;
+      const { areaId } = input;
+
+      // Verificar si el usuario tiene acceso al área (ya sea como ADMIN o MEMBER)
+      const userArea = await db.userArea.findFirst({
+        where: {
+          userId,
+          areaId,
+        },
+      });
+
+      if (!userArea) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "No tienes acceso a esta área.",
+        });
+      }
+
+      // Recuperar los archivos del área junto con la información del usuario que los subió
+      const areaFiles = await db.file.findMany({
+        where: {
+          areaId,
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              email: true,
+            },
+          },
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
+
+      if (areaFiles.length === 0) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "No se encontraron archivos en esta área.",
+        });
+      }
+
+      return areaFiles.map((file) => ({
+        id: file.id,
+        name: file.name,
+        url: file.url,
+        createdAt: file.createdAt,
+        uploadedBy: {
+          id: file.user.id,
+          email: file.user.email,
+        },
+      }));
+    }),
 });
 
 export type AppRouter = typeof appRouter;
