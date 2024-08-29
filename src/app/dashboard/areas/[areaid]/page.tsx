@@ -1,4 +1,5 @@
 import AreaDashboard from "@/components/AreaDashboard";
+import AreasDashboard from "@/components/AreasDashboard";
 import { db } from "@/db";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { notFound, redirect } from "next/navigation";
@@ -30,7 +31,7 @@ const Page = async ({ params }: PageProps) => {
     notFound();
   }
 
-  return <AreaDashboard areaId={areaid} areaName={area.name} />;
+  return <AreasDashboard areaId={areaid} areaName={area.name} />;
 };
 
 export default Page;

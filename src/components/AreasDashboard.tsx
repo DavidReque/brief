@@ -8,15 +8,13 @@ import Link from "next/link";
 import { format } from "date-fns";
 import { Button } from "./ui/button";
 import { useState } from "react";
-import { LogoutLink } from "@kinde-oss/kinde-auth-nextjs/components";
-import SideBar from "./SideBar";
 
 interface AreaDashboardProps {
   areaId: string;
   areaName: string;
 }
 
-const AreaDashboard = ({ areaId, areaName }: AreaDashboardProps) => {
+const AreasDashboard = ({ areaId, areaName }: AreaDashboardProps) => {
   const [currentlyDeletingFile, setCurrentlyDeletingFile] = useState<
     string | null
   >(null);
@@ -40,7 +38,6 @@ const AreaDashboard = ({ areaId, areaName }: AreaDashboardProps) => {
 
   return (
     <div className="flex">
-      <SideBar />
       <main className="flex-1 mx-auto max-w-7xl p-4 md:p-10">
         <div className="mt-8 flex flex-col items-start justify-between gap-4 border-b border-gray-200 pb-5 sm:flex-row sm:items-center sm:gap-0">
           <h1 className="mb-3 font-bold text-5xl text-gray-900">{areaName}</h1>
@@ -118,4 +115,4 @@ const AreaDashboard = ({ areaId, areaName }: AreaDashboardProps) => {
   );
 };
 
-export default AreaDashboard;
+export default AreasDashboard;

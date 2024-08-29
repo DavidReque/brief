@@ -213,12 +213,28 @@ export const appRouter = router({
         });
       }
 
+      // Eliminar todos los archivos asociados al área
+      await db.file.deleteMany({
+        where: {
+          areaId: input.areaId,
+        },
+      });
+
+      // Eliminar todas las relaciones de `userArea` asociadas al área
+      await db.userArea.deleteMany({
+        where: {
+          areaId: input.areaId,
+        },
+      });
+
+      // Ahora puedes eliminar el área
       await db.area.delete({
         where: { id: input.areaId },
       });
 
-      return { succes: true };
+      return { success: true };
     }),
+
   getAllUsers: privateProcedure.query(async ({ ctx }) => {
     // verifica que el usuario esté autenticado
     const { userId } = ctx;

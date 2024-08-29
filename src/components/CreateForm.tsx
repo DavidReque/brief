@@ -31,7 +31,6 @@ const CreateForm = (props: Props) => {
         title: "Área creada",
         description: "El área se ha creado con éxito.",
       });
-      router.push(`/create-area/${data.id}`);
     },
     onError: (error) => {
       toast({
