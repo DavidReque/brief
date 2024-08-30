@@ -10,14 +10,17 @@ import {
   Menu,
   X,
   LogOut,
+  Plus,
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { LogoutLink } from "@kinde-oss/kinde-auth-nextjs/components";
 
-const SideBar = () => {
-  const pathname = usePathname();
+interface DashboardProps {
+  isAdmin: boolean;
+}
+
+const SideBar = ({ isAdmin }: DashboardProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -55,6 +58,16 @@ const SideBar = () => {
           <span className="text-xs md:text-sm">{item.name}</span>
         </Link>
       ))}
+
+      {isAdmin && (
+        <Link
+          className="flex items-center justify-center py-4 hover:bg-gray-200"
+          href="/create"
+        >
+          <Plus />
+          <span className="ml-2 text-xs md:text-sm">Crear Area</span>
+        </Link>
+      )}
 
       <LogoutLink className="flex items-center justify-center py-4 hover:bg-gray-200">
         <LogOut />

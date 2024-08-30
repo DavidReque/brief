@@ -47,7 +47,9 @@ const AreasDashboard = ({ areaId, areaName }: AreaDashboardProps) => {
         </div>
 
         {/* Mostrar todos los archivos del área */}
-        {files && files.length !== 0 ? (
+        {isLoading ? (
+          <Skeleton height={100} className="my-2" count={3} />
+        ) : files && files.length > 0 ? (
           <ul className="mt-8 grid grid-cols-1 gap-6 divide-y divide-zinc-200 md:grid-cols-2 lg:grid-cols-3">
             {files
               .sort(
@@ -101,8 +103,6 @@ const AreasDashboard = ({ areaId, areaName }: AreaDashboardProps) => {
                 </li>
               ))}
           </ul>
-        ) : isLoading ? (
-          <Skeleton height={100} className="my-2" count={3} />
         ) : (
           <div className="mt-16 flex flex-col items-center gap-2">
             <Ghost className="h-8 w-8 text-zinc-800" />

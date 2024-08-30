@@ -15,9 +15,15 @@ const Page = async ({ params }: PageProps) => {
   const { getUser } = getKindeServerSession();
   const user = await getUser();
 
-  if (!user) {
-    redirect("/login");
-  }
+  if (!user || !user.id) redirect("/auth-callback?origin=dashboard");
+
+  const dbUser = await db.user.findFirst({
+    where: {
+      id: user.id,
+    },
+  });
+
+  if (!dbUser) redirect("/auth-callback?origin=dashboard");
 
   // Verificar si el usuario tiene acceso como ADMIN al área
   const isAdmin = await db.userArea.findFirst({

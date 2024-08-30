@@ -7,9 +7,15 @@ const Page = async () => {
   const { getUser } = getKindeServerSession();
   const user = await getUser();
 
-  if (!user) {
-    redirect("/login");
-  }
+  if (!user || !user.id) redirect("/auth-callback?origin=dashboard");
+
+  const dbUser = await db.user.findFirst({
+    where: {
+      id: user.id,
+    },
+  });
+
+  if (!dbUser) redirect("/auth-callback?origin=dashboard");
 
   const isAdmin = await db.userArea.findFirst({
     where: {

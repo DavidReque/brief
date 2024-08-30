@@ -10,7 +10,11 @@ import { Button } from "./ui/button";
 import { useState } from "react";
 import SideBar from "./SideBar";
 
-const Dashboard = () => {
+interface DashboardProps {
+  isAdmin: boolean;
+}
+
+const Dashboard = ({ isAdmin }: DashboardProps) => {
   const [currentlyDeletingFile, setCurrentlyDeletingFile] = useState<
     string | null
   >(null);
@@ -33,7 +37,7 @@ const Dashboard = () => {
 
   return (
     <div className="flex">
-      <SideBar />
+      <SideBar isAdmin={isAdmin} />
       <main className="flex-1 mx-auto max-w-7xl p-4 md:p-10">
         <div className="mt-12 flex flex-col items-start justify-between gap-4 border-b border-gray-200 pb-5 sm:flex-row sm:items-center sm:gap-0">
           <h1 className="mb-3 font-bold text-5xl text-gray-900">

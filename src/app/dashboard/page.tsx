@@ -7,6 +7,15 @@ const Page = async () => {
   const { getUser } = getKindeServerSession();
   const user = await getUser();
 
+  const adminArea = await db.userArea.findFirst({
+    where: {
+      userId: user?.id,
+      role: "ADMIN",
+    },
+  });
+
+  const isAdmin = !!adminArea; // Convert to boolean
+
   if (!user || !user.id) redirect("/auth-callback?origin=dashboard");
 
   const dbUser = await db.user.findFirst({
@@ -17,7 +26,7 @@ const Page = async () => {
 
   if (!dbUser) redirect("/auth-callback?origin=dashboard");
 
-  return <Dashboard />;
+  return <Dashboard isAdmin={isAdmin} />;
 };
 
 export default Page;

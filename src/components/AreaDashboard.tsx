@@ -8,7 +8,6 @@ import Link from "next/link";
 import { format } from "date-fns";
 import { Button } from "./ui/button";
 import { useState } from "react";
-import { LogoutLink } from "@kinde-oss/kinde-auth-nextjs/components";
 import SideBar from "./SideBar";
 
 interface AreaDashboardProps {
@@ -40,7 +39,7 @@ const AreaDashboard = ({ areaId, areaName }: AreaDashboardProps) => {
 
   return (
     <div className="flex">
-      <SideBar />
+      <SideBar isAdmin />
       <main className="flex-1 mx-auto max-w-7xl p-4 md:p-10">
         <div className="mt-8 flex flex-col items-start justify-between gap-4 border-b border-gray-200 pb-5 sm:flex-row sm:items-center sm:gap-0">
           <h1 className="mb-3 font-bold text-5xl text-gray-900">{areaName}</h1>
@@ -50,7 +49,9 @@ const AreaDashboard = ({ areaId, areaName }: AreaDashboardProps) => {
         </div>
 
         {/* Mostrar todos los archivos del área */}
-        {files && files.length !== 0 ? (
+        {isLoading ? (
+          <Skeleton height={100} className="my-2" count={3} />
+        ) : files && files.length > 0 ? (
           <ul className="mt-8 grid grid-cols-1 gap-6 divide-y divide-zinc-200 md:grid-cols-2 lg:grid-cols-3">
             {files
               .sort(
@@ -104,8 +105,6 @@ const AreaDashboard = ({ areaId, areaName }: AreaDashboardProps) => {
                 </li>
               ))}
           </ul>
-        ) : isLoading ? (
-          <Skeleton height={100} className="my-2" count={3} />
         ) : (
           <div className="mt-16 flex flex-col items-center gap-2">
             <Ghost className="h-8 w-8 text-zinc-800" />
