@@ -7,9 +7,9 @@ import Dropzone from "react-dropzone";
 import { Cloud, File, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Progress } from "./ui/progress";
-import { useUploadThing } from "@/lib/uploadthing";
 import { useToast } from "./ui/use-toast";
 import { trpc } from "@/app/_trpc/client";
+import axios from "axios";
 import {
   Select,
   SelectContent,
@@ -24,45 +24,19 @@ const UploadDropzone = () => {
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const [selectedArea, setSelectedArea] = useState<string>("");
-  // CAMBIO: Nuevo estado para almacenar el archivo aceptado
   const [acceptedFile, setAcceptedFile] = useState<File | null>(null);
   const { toast } = useToast();
-  const { startUpload } = useUploadThing("fileUploader");
 
   const { data: areas } = trpc.getUserAreas.useQuery();
 
-  const { mutate: startPolling } = trpc.getFile.useMutation({
-    onSuccess(file) {
-      router.push(`/dashboard/${file.id}`);
-    },
-    retry: true,
-    retryDelay: 500,
-  });
-
-  const startSimulatedProgress = () => {
-    setUploadProgress(0);
-    const interval = setInterval(() => {
-      setUploadProgress((prevProgress) => {
-        if (prevProgress >= 95) {
-          clearInterval(interval);
-          return prevProgress;
-        }
-        return prevProgress + 5;
-      });
-    }, 500);
-    return interval;
-  };
-
-  // función para manejar la selección de archivo
   const handleFileDrop = useCallback((acceptedFiles: File[]) => {
     if (acceptedFiles && acceptedFiles[0]) {
       setAcceptedFile(acceptedFiles[0]);
     }
   }, []);
 
-  // función para manejar la carga del archivo
   const handleUpload = async (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevenir la propagación del evento
+    e.preventDefault();
 
     if (!selectedArea) {
       toast({
@@ -85,40 +59,42 @@ const UploadDropzone = () => {
     }
 
     setIsUploading(true);
-    const progressInterval = startSimulatedProgress();
-    const res = await startUpload([acceptedFile]);
+    const formData = new FormData();
+    formData.append("file", acceptedFile);
+    formData.append("areaId", selectedArea);
 
-    if (!res) {
+    try {
+      const response = await axios.post("/api/upload", formData, {
+        onUploadProgress: (progressEvent) => {
+          const progress = progressEvent.total
+            ? Math.round((progressEvent.loaded * 100) / progressEvent.total)
+            : 0;
+          setUploadProgress(progress);
+        },
+      });
+
+      if (response.status === 200) {
+        toast({
+          title: "Éxito",
+          description: "Archivo cargado correctamente.",
+        });
+        // Aquí puedes agregar la lógica para redirigir al usuario o actualizar la UI
+        router.push(`/dashboard/${response.data.fileId}`);
+      }
+    } catch (error) {
+      console.error("Error uploading file:", error);
       toast({
-        title: "Algo salió mal",
-        description: "Por favor intenta de nuevo más tarde.",
+        title: "Error",
+        description: "Hubo un problema al cargar el archivo.",
         variant: "destructive",
       });
+    } finally {
       setIsUploading(false);
-      return;
     }
-
-    const [fileResponse] = res;
-    const key = fileResponse?.key;
-
-    if (!key) {
-      toast({
-        title: "Algo salió mal",
-        description: "Por favor intenta de nuevo más tarde.",
-        variant: "destructive",
-      });
-      setIsUploading(false);
-      return;
-    }
-
-    clearInterval(progressInterval);
-    setUploadProgress(100);
-    startPolling({ key });
   };
 
   return (
     <div className="border h-64 m-4 border-dashed border-gray-300 rounded-lg">
-      {/* Dropzone ahora solo maneja la selección de archivo */}
       <Dropzone multiple={false} onDrop={handleFileDrop}>
         {({ getRootProps, getInputProps }) => (
           <div {...getRootProps()} className="h-full">
@@ -137,7 +113,6 @@ const UploadDropzone = () => {
                   </p>
                 </div>
 
-                {/* Usar acceptedFile en lugar de acceptedFiles */}
                 {acceptedFile ? (
                   <div className="max-w-xs bg-white flex items-center rounded-md overflow-hidden outline outline-[1px] outline-zinc-200 divide-x divide-zinc-200">
                     <div className="px-3 py-2 h-full grid place-items-center">
@@ -198,10 +173,13 @@ const UploadDropzone = () => {
         </Select>
       </div>
 
-      {/* CAMBIO: Botón de carga movido fuera del área de Dropzone */}
       {acceptedFile && selectedArea && (
-        <Button onClick={handleUpload} className="mx-auto">
-          Iniciar carga
+        <Button
+          onClick={handleUpload}
+          className="mx-auto"
+          disabled={isUploading}
+        >
+          {isUploading ? "Cargando..." : "Iniciar carga"}
         </Button>
       )}
     </div>

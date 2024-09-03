@@ -5,7 +5,7 @@ import { UploadThingError } from "uploadthing/server";
 
 const f = createUploadthing();
 
-const getFileType = (fileName: string): "PDF" | "WORD" | "EXCEL" => {
+export const getFileType = (fileName: string): "PDF" | "WORD" | "EXCEL" => {
   const extension = fileName.split(".").pop()?.toLowerCase();
   switch (extension) {
     case "pdf":
