@@ -78,7 +78,7 @@ const UploadDropzone = () => {
           title: "Éxito",
           description: "Archivo cargado correctamente.",
         });
-        // Aquí puedes agregar la lógica para redirigir al usuario o actualizar la UI
+        // redirigir al usuario
         router.push(`/dashboard/${response.data.fileId}`);
       }
     } catch (error) {

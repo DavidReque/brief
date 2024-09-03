@@ -13,8 +13,6 @@ AWS.config.update({
 const s3 = new AWS.S3();
 
 export async function POST(request: Request) {
-  console.log("Received a POST request");
-
   const { getUser } = getKindeServerSession();
   const user = await getUser();
 
