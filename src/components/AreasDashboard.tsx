@@ -2,7 +2,7 @@
 
 import { trpc } from "@/app/_trpc/client";
 import UploadButton from "./UploadButton";
-import { Ghost, Loader2, Plus, Trash, User } from "lucide-react";
+import { Download, Ghost, Loader2, Plus, Trash } from "lucide-react";
 import Skeleton from "react-loading-skeleton";
 import Link from "next/link";
 import { format } from "date-fns";
@@ -88,6 +88,15 @@ const AreasDashboard = ({
                       <Plus className="h-4 w-4" />
                       {format(new Date(file.createdAt), "dd/MM/yy")}
                     </div>
+
+                    <Link
+                      href={file.url}
+                      download
+                      className="flex items-center text-sm text-gray-500"
+                    >
+                      <Download className="h-4 w-4 mr-1" />
+                      <span>Descargar</span>
+                    </Link>
 
                     {file.uploadedBy.id === currentUserId && (
                       <Button

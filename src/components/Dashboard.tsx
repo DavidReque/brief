@@ -2,7 +2,7 @@
 
 import { trpc } from "@/app/_trpc/client";
 import UploadButton from "./UploadButton";
-import { Ghost, Loader2, MessageSquare, Plus, Trash } from "lucide-react";
+import { Download, Ghost, Loader2, Trash } from "lucide-react";
 import Skeleton from "react-loading-skeleton";
 import Link from "next/link";
 import { format } from "date-fns";
@@ -80,10 +80,14 @@ const Dashboard = ({ isAdmin }: DashboardProps) => {
                       </div>
                     </Link>
                     <div className="px-6 py-4 bg-gray-50 flex justify-between items-center">
-                      <div className="flex items-center text-sm text-gray-500">
-                        <MessageSquare className="h-4 w-4 mr-1" />
-                        <span>mocked</span>
-                      </div>
+                      <Link
+                        href={file.url}
+                        download
+                        className="flex items-center text-sm text-gray-500"
+                      >
+                        <Download className="h-4 w-4 mr-1" />
+                        <span>Descargar</span>
+                      </Link>
                       <Button
                         onClick={() => deleteFile({ id: file.id })}
                         size="sm"
