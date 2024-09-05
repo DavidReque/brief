@@ -37,82 +37,85 @@ const Dashboard = ({ isAdmin }: DashboardProps) => {
   });
 
   return (
-    <div className="flex">
+    <div className="flex h-screen bg-gray-100">
       <SideBar isAdmin={isAdmin} />
-      <main className="flex-1 mx-auto max-w-7xl p-4 md:p-10">
-        <div className="mt-12 flex flex-col items-start justify-between gap-4 border-b border-gray-200 pb-5 sm:flex-row sm:items-center sm:gap-0">
-          <h1 className="mb-3 font-bold text-5xl text-gray-900">
-            Mis archivos
-          </h1>
-          <UploadButton />
-        </div>
+      <main className="flex-1 overflow-y-auto p-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex justify-between items-center mb-8">
+            <h1 className="text-3xl font-bold text-gray-900">Mis archivos</h1>
+            <UploadButton />
+          </div>
 
-        {/* display all user files */}
-        {files && files.length !== 0 ? (
-          <ul className="mt-8 grid grid-cols-1 gap-6 divide-y divide-zinc-200 md:grid-cols-2 lg:grid-cols-3">
-            {files
-              .sort(
-                (a, b) =>
-                  new Date(b.createdAt).getTime() -
-                  new Date(a.createdAt).getTime()
-              )
-              .map((file) => (
-                <li
-                  key={file.id}
-                  className="col-span-1 divide-y divide-gray-200 rounded-lg bg-white shadow transition hover:shadow-lg"
-                >
-                  <Link
-                    href={`/dashboard/${file.id}`}
-                    className="flex flex-col gap-2"
+          {files && files.length !== 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {files
+                .sort(
+                  (a, b) =>
+                    new Date(b.createdAt).getTime() -
+                    new Date(a.createdAt).getTime()
+                )
+                .map((file) => (
+                  <div
+                    key={file.id}
+                    className="bg-white rounded-lg shadow-md overflow-hidden"
                   >
-                    <div className="pt-6 px-6 flex w-full items-center justify-between space-x-6">
-                      <div className="h-10 w-10 flex-shrink-0 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500" />
-                      <div className="flex-1 truncate">
-                        <div className="flex items-center space-x-3">
-                          <h3 className="truncate text-lg font-medium text-zinc-900">
+                    <Link
+                      href={`/dashboard/${file.id}`}
+                      className="block p-6 hover:bg-gray-50"
+                    >
+                      <div className="flex items-center">
+                        <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500" />
+                        <div className="ml-4 flex-1">
+                          <h3 className="text-lg font-medium text-gray-900 truncate">
                             {file.name}
                           </h3>
+                          <p className="text-sm text-gray-500">
+                            {format(
+                              new Date(file.createdAt),
+                              "dd 'de' MMMM, yyyy",
+                              { locale: es }
+                            )}
+                          </p>
                         </div>
                       </div>
+                    </Link>
+                    <div className="px-6 py-4 bg-gray-50 flex justify-between items-center">
+                      <div className="flex items-center text-sm text-gray-500">
+                        <MessageSquare className="h-4 w-4 mr-1" />
+                        <span>mocked</span>
+                      </div>
+                      <Button
+                        onClick={() => deleteFile({ id: file.id })}
+                        size="sm"
+                        variant="destructive"
+                        className="px-2 py-1"
+                      >
+                        {currentlyDeletingFile === file.id ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Trash className="h-4 w-4" />
+                        )}
+                      </Button>
                     </div>
-                  </Link>
-
-                  <div className="px-6 mt-4 grid grid-cols-3 place-items-center py-2 gap-6 text-xs text-zinc-500">
-                    <div className="flex items-center gap-2">
-                      <Plus className="h-4 w-4" />
-                      {format(new Date(file.createdAt), "dd/MM/yy")}
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <MessageSquare className="h-4 w-4" />
-                      mocked
-                    </div>
-
-                    <Button
-                      onClick={() => deleteFile({ id: file.id })}
-                      size="sm"
-                      className="w-full"
-                      variant="destructive"
-                    >
-                      {currentlyDeletingFile === file.id ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Trash className="h-4 w-4" />
-                      )}
-                    </Button>
                   </div>
-                </li>
+                ))}
+            </div>
+          ) : isLoading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[...Array(6)].map((_, i) => (
+                <Skeleton key={i} height={200} className="w-full" />
               ))}
-          </ul>
-        ) : isLoading ? (
-          <Skeleton height={100} className="my-2" count={3} />
-        ) : (
-          <div className="mt-16 flex flex-col items-center gap-2">
-            <Ghost className="h-8 w-8 text-zinc-800" />
-            <h3 className="font-semibold text-xl">Muy vacio por aqui</h3>
-            <p>Carguemos un archivo</p>
-          </div>
-        )}
+            </div>
+          ) : (
+            <div className="text-center mt-16">
+              <Ghost className="mx-auto h-12 w-12 text-gray-400" />
+              <h3 className="mt-2 text-xl font-medium text-gray-900">
+                Muy vacío por aquí
+              </h3>
+              <p className="mt-1 text-gray-500">Carguemos un archivo</p>
+            </div>
+          )}
+        </div>
       </main>
     </div>
   );
