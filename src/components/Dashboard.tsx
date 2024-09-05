@@ -6,6 +6,7 @@ import { Ghost, Loader2, MessageSquare, Plus, Trash } from "lucide-react";
 import Skeleton from "react-loading-skeleton";
 import Link from "next/link";
 import { format } from "date-fns";
+import { es } from "date-fns/locale";
 import { Button } from "./ui/button";
 import { useState } from "react";
 import SideBar from "./SideBar";
@@ -79,7 +80,7 @@ const Dashboard = ({ isAdmin }: DashboardProps) => {
                   <div className="px-6 mt-4 grid grid-cols-3 place-items-center py-2 gap-6 text-xs text-zinc-500">
                     <div className="flex items-center gap-2">
                       <Plus className="h-4 w-4" />
-                      {format(new Date(file.createdAt), "MMM yyyy")}
+                      {format(new Date(file.createdAt), "dd/MM/yy")}
                     </div>
 
                     <div className="flex items-center gap-2">
