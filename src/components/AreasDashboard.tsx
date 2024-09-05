@@ -14,9 +14,15 @@ interface AreaDashboardProps {
   areaId: string;
   areaName: string;
   isAdmin: boolean;
+  currentUserId: string; // Añade el ID del usuario autenticado
 }
 
-const AreasDashboard = ({ areaId, areaName, isAdmin }: AreaDashboardProps) => {
+const AreasDashboard = ({
+  areaId,
+  areaName,
+  isAdmin,
+  currentUserId,
+}: AreaDashboardProps) => {
   const [currentlyDeletingFile, setCurrentlyDeletingFile] = useState<
     string | null
   >(null);
@@ -90,17 +96,21 @@ const AreasDashboard = ({ areaId, areaName, isAdmin }: AreaDashboardProps) => {
                     <div className="flex items-center gap-2 col-span-2 justify-between">
                       <User className="h-4 w-4" />
                       <span className="truncate">{file.uploadedBy.email}</span>
-                      <Button
-                        onClick={() => deleteFile({ id: file.id })}
-                        size="sm"
-                        variant="destructive"
-                      >
-                        {currentlyDeletingFile === file.id ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <Trash className="h-4 w-4" />
-                        )}
-                      </Button>
+
+                      {/* Mostrar botón de eliminar solo si el usuario es el que subió el archivo */}
+                      {file.uploadedBy.id === currentUserId && (
+                        <Button
+                          onClick={() => deleteFile({ id: file.id })}
+                          size="sm"
+                          variant="destructive"
+                        >
+                          {currentlyDeletingFile === file.id ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Trash className="h-4 w-4" />
+                          )}
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </li>

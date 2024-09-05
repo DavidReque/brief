@@ -72,10 +72,17 @@ export const appRouter = router({
     .mutation(async ({ ctx, input }) => {
       const { userId } = ctx;
 
+      // Buscar el archivo y verificar que el usuario tenga acceso al área del archivo
       const file = await db.file.findFirst({
         where: {
           key: input.key,
-          userId,
+          area: {
+            users: {
+              some: {
+                userId, // Verifica si el usuario pertenece al área del archivo
+              },
+            },
+          },
         },
       });
 

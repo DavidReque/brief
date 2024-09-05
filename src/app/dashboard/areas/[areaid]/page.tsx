@@ -41,7 +41,12 @@ const Page = async ({ params }: PageProps) => {
   }
 
   return (
-    <AreasDashboard isAdmin={isAdmin} areaId={areaid} areaName={area.name} />
+    <AreasDashboard
+      currentUserId={user.id}
+      isAdmin={isAdmin}
+      areaId={areaid}
+      areaName={area.name}
+    />
   );
 };
 
