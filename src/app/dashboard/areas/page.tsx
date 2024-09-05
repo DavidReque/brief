@@ -20,7 +20,6 @@ const Page = async () => {
 
   return (
     <div className="container mx-auto p-8">
-      <h1 className="text-3xl font-bold mb-6">Áreas y Archivos</h1>
       <AreaList isAdmin={isAdmin} />
     </div>
   );

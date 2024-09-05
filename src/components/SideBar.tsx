@@ -77,7 +77,9 @@ const SideBar = ({ isAdmin }: DashboardProps) => {
       <div className="border-t border-gray-200 my-4"></div>
 
       <div className="overflow-y-auto">
-        <h3 className="text-xs font-semibold px-4 mb-2">Mis Áreas</h3>
+        <Link href="/dashboard/areas">
+          <h3 className="text-xs font-semibold px-4 mb-2">Mis Áreas</h3>
+        </Link>
         {isLoading ? (
           <div className="text-center">
             <Loader2 className="h-4 w-4 animate-spin" />

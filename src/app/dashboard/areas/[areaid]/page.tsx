@@ -20,6 +20,15 @@ const Page = async ({ params }: PageProps) => {
     redirect("/login");
   }
 
+  const adminArea = await db.userArea.findFirst({
+    where: {
+      userId: user?.id,
+      role: "ADMIN",
+    },
+  });
+
+  const isAdmin = !!adminArea; // Convert to boolean
+
   // Recuperar el área y los archivos asociados, junto con la información del usuario
   const area = await db.area.findFirst({
     where: {
@@ -31,7 +40,9 @@ const Page = async ({ params }: PageProps) => {
     notFound();
   }
 
-  return <AreasDashboard areaId={areaid} areaName={area.name} />;
+  return (
+    <AreasDashboard isAdmin={isAdmin} areaId={areaid} areaName={area.name} />
+  );
 };
 
 export default Page;

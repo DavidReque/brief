@@ -5,6 +5,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { Loader2, Trash } from "lucide-react";
 import { Button } from "./ui/button";
+import SideBar from "./SideBar";
 
 type Area = {
   id: string;
