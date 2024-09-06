@@ -289,6 +289,7 @@ export const appRouter = router({
         name: file.name,
         url: file.url,
         createdAt: file.createdAt,
+        fileType: file.fileType,
         uploadedBy: {
           id: file.user.id,
           email: file.user.email,
