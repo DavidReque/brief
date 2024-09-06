@@ -27,6 +27,7 @@ import {
   SelectValue,
 } from "./ui/select";
 import { Input } from "./ui/input";
+import { es } from "date-fns/locale";
 
 interface AreaDashboardProps {
   areaId: string;
@@ -74,9 +75,10 @@ const AreasDashboard = ({
 
   // Filtrado local actualizado
   const filteredFiles = files?.filter((file) => {
-    const matchesSearch = file.name
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase());
+    const query = searchQuery.toLowerCase();
+    const matchesSearch =
+      file.name.toLowerCase().includes(query) ||
+      file.uploadedBy.email.toLowerCase().includes(query); // Filtrar por nombre de usuario
     const matchesFileType = fileTypeFilter
       ? file.fileType === fileTypeFilter
       : true;
@@ -142,7 +144,7 @@ const AreasDashboard = ({
               <SelectValue placeholder="Tipo de archivo" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="Tipo de archivo">Todos los tipos</SelectItem>
+              <SelectItem value="Todos">Todos los tipos</SelectItem>
               <SelectItem value={FileType.PDF}>PDF</SelectItem>
               <SelectItem value={FileType.WORD}>Word</SelectItem>
               <SelectItem value={FileType.EXCEL}>Excel</SelectItem>
@@ -176,16 +178,22 @@ const AreasDashboard = ({
                         <h3 className="text-lg font-medium text-gray-900 truncate">
                           {file.name}
                         </h3>
-                        <p className="text-sm text-gray-500">
-                          {format(
-                            new Date(file.createdAt),
-                            "dd 'de' MMMM, yyyy"
-                          )}
+                        <p className="text-sm text-gray-500 truncate">
+                          {file.uploadedBy.email}
                         </p>
                       </div>
                     </div>
                   </Link>
+
                   <div className="px-6 py-4 bg-gray-50 flex justify-between items-center">
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm text-gray-500">
+                        {format(new Date(file.createdAt), "dd/MM/yyyy", {
+                          locale: es,
+                        })}
+                      </p>
+                    </div>
+
                     <Link
                       href={file.url}
                       download

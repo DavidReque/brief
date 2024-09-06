@@ -167,11 +167,9 @@ const Dashboard = ({ isAdmin }: DashboardProps) => {
                             {file.name}
                           </h3>
                           <p className="text-sm text-gray-500">
-                            {format(
-                              new Date(file.createdAt),
-                              "dd 'de' MMMM, yyyy",
-                              { locale: es }
-                            )}
+                            {format(new Date(file.createdAt), "dd/MM/yyyy", {
+                              locale: es,
+                            })}
                           </p>
                         </div>
                       </div>
