@@ -1,27 +1,54 @@
 "use client";
 
+import { useState } from "react";
 import { trpc } from "@/app/_trpc/client";
 import UploadButton from "./UploadButton";
-import { Download, Ghost, Loader2, Trash } from "lucide-react";
+import {
+  Download,
+  Ghost,
+  Loader2,
+  Trash,
+  Search,
+  Calendar as CalendarIcon,
+} from "lucide-react";
 import Skeleton from "react-loading-skeleton";
 import Link from "next/link";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Button } from "./ui/button";
-import { useState } from "react";
 import SideBar from "./SideBar";
+import { Input } from "./ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
+import { Calendar } from "./ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 
 interface DashboardProps {
   isAdmin: boolean;
 }
 
+// Definimos el enum FileType para que coincida con el modelo Prisma
+enum FileType {
+  PDF = "PDF",
+  WORD = "WORD",
+  EXCEL = "EXCEL",
+}
+
 const Dashboard = ({ isAdmin }: DashboardProps) => {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [fileTypeFilter, setFileTypeFilter] = useState<FileType | "">("");
+  const [dateFilter, setDateFilter] = useState<Date | undefined>(undefined);
+
   const [currentlyDeletingFile, setCurrentlyDeletingFile] = useState<
     string | null
   >(null);
 
   const utils = trpc.useUtils();
-
   const { data: files, isLoading } = trpc.getUserFiles.useQuery();
 
   const { mutate: deleteFile } = trpc.deleteFile.useMutation({
@@ -36,6 +63,22 @@ const Dashboard = ({ isAdmin }: DashboardProps) => {
     },
   });
 
+  // Filtrado local actualizado
+  const filteredFiles = files?.filter((file) => {
+    const matchesSearch = file.name
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
+    const matchesFileType = fileTypeFilter
+      ? file.fileType === fileTypeFilter
+      : true;
+    const matchesDate = dateFilter
+      ? format(new Date(file.createdAt), "yyyy-MM-dd") ===
+        format(dateFilter, "yyyy-MM-dd")
+      : true;
+
+    return matchesSearch && matchesFileType && matchesDate;
+  });
+
   return (
     <div className="flex h-screen bg-gray-100">
       <SideBar isAdmin={isAdmin} />
@@ -46,9 +89,63 @@ const Dashboard = ({ isAdmin }: DashboardProps) => {
             <UploadButton />
           </div>
 
-          {files && files.length !== 0 ? (
+          {/* Filtros */}
+          <div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <Input
+                type="text"
+                placeholder="Buscar por nombre"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start text-left font-normal"
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {dateFilter ? (
+                    format(dateFilter, "PPP")
+                  ) : (
+                    <span>Seleccionar fecha</span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0">
+                <Calendar
+                  mode="single"
+                  selected={dateFilter}
+                  onSelect={setDateFilter}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+            <Select
+              value={fileTypeFilter}
+              onValueChange={(value) =>
+                setFileTypeFilter(value as FileType | "")
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Tipo de archivo" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Tipo de archivo">Todos los tipos</SelectItem>
+                <SelectItem value={FileType.PDF}>PDF</SelectItem>
+                <SelectItem value={FileType.WORD}>Word</SelectItem>
+                <SelectItem value={FileType.EXCEL}>Excel</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Mostrar archivos filtrados */}
+          {filteredFiles && filteredFiles.length !== 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {files
+              {filteredFiles
                 .sort(
                   (a, b) =>
                     new Date(b.createdAt).getTime() -
