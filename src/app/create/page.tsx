@@ -17,18 +17,18 @@ const Page = async () => {
 
   if (!dbUser) redirect("/auth-callback?origin=dashboard");
 
-  const isAdmin = await db.userArea.findFirst({
+  const isAdmin = !!(await db.userArea.findFirst({
     where: {
       userId: user.id,
       role: "ADMIN",
     },
-  });
+  }));
 
   if (!isAdmin) {
     redirect("/dashboard");
   }
 
-  return <CreateForm />;
+  return <CreateForm isAdmin={isAdmin} />;
 };
 
 export default Page;

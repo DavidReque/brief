@@ -12,6 +12,7 @@ import {
   LogOut,
   Plus,
   ChevronDown,
+  AreaChart,
 } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
@@ -74,6 +75,14 @@ const SideBar = ({ isAdmin }: DashboardProps) => {
             <span className="text-sm">Crear Área</span>
           </Link>
         )}
+
+        <Link
+          className="flex items-center px-5 py-3 text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors duration-200"
+          href="/dashboard/areas"
+        >
+          <AreaChart className="w-5 h-5 mr-3" />
+          <span className="text-sm">Areas</span>
+        </Link>
 
         <div className="mt-4 px-5">
           <button
