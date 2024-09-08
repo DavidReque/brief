@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import AWS from "aws-sdk";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { db } from "@/db";
+import { FileType } from "@prisma/client";
 
 // Configuración de AWS S3
 AWS.config.update({
@@ -81,7 +82,7 @@ export async function POST(request: Request) {
   }
 }
 
-function getFileType(fileName: string): "PDF" | "WORD" | "EXCEL" {
+function getFileType(fileName: string): "PDF" | "WORD" | "EXCEL" | "IMAGE" {
   const extension = fileName.split(".").pop()?.toLowerCase();
   switch (extension) {
     case "pdf":
@@ -92,6 +93,13 @@ function getFileType(fileName: string): "PDF" | "WORD" | "EXCEL" {
     case "xls":
     case "xlsx":
       return "EXCEL";
+    case "jpg":
+    case "jpeg":
+    case "png":
+    case "gif":
+    case "bmp":
+    case "svg":
+      return FileType.IMAGE;
     default:
       throw new Error("Unsupported file type");
   }

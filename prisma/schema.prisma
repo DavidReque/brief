@@ -67,4 +67,5 @@ enum FileType {
   PDF
   WORD
   EXCEL
+  IMAGE
 }

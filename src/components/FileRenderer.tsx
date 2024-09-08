@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { useToast } from "./ui/use-toast";
+import Image from "next/image";
 
 interface FileRendererProps {
   url: string;
@@ -51,11 +52,12 @@ const FileRenderer = ({ url, fileType }: FileRendererProps) => {
       return `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(
         url
       )}`;
-    } else {
+    } else if (fileType === "PDF") {
       return `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(
         url
       )}`;
     }
+    return url;
   };
 
   return (
@@ -66,17 +68,27 @@ const FileRenderer = ({ url, fileType }: FileRendererProps) => {
             <Loader2 className="h-6 w-6 animate-spin" />
           </div>
         )}
-        {!error && (
-          <iframe
-            src={getViewerUrl()}
-            width="100%"
-            height="100%"
-            frameBorder="0"
+        {!error && fileType === "IMAGE" ? (
+          <img
+            src={url}
+            alt="Archivo subido"
             onLoad={handleLoad}
-            onError={handleError}
-            className="rounded-md absolute inset-0"
+            className="rounded-md absolute inset-0 object-contain w-full h-full"
             style={{ visibility: loading ? "hidden" : "visible" }}
           />
+        ) : (
+          !error && (
+            <iframe
+              src={getViewerUrl()}
+              width="100%"
+              height="100%"
+              frameBorder="0"
+              onLoad={handleLoad}
+              onError={handleError}
+              className="rounded-md absolute inset-0"
+              style={{ visibility: loading ? "hidden" : "visible" }}
+            />
+          )
         )}
         {error && (
           <div className="flex justify-center items-center h-full">

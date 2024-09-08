@@ -96,6 +96,7 @@ export const appRouter = router({
     .mutation(async ({ ctx, input }) => {
       const { userId } = ctx;
 
+      // obtenemos el archivo especifico a eliminar
       const file = await db.file.findFirst({
         where: {
           id: input.id,
@@ -107,6 +108,7 @@ export const appRouter = router({
         throw new TRPCError({ code: "NOT_FOUND" });
       }
 
+      // eliminamos el archivo co su id asignado
       await db.file.delete({
         where: {
           id: input.id,

@@ -144,7 +144,7 @@ const AreasDashboard = ({
               <SelectValue placeholder="Tipo de archivo" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="Todos">Todos los tipos</SelectItem>
+              <select value="">Todos los tipos</select>
               <SelectItem value={FileType.PDF}>PDF</SelectItem>
               <SelectItem value={FileType.WORD}>Word</SelectItem>
               <SelectItem value={FileType.EXCEL}>Excel</SelectItem>
