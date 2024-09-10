@@ -28,6 +28,12 @@ import {
 } from "./ui/select";
 import { Input } from "./ui/input";
 import { es } from "date-fns/locale";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "./ui/tooltip";
 
 interface AreaDashboardProps {
   areaId: string;
@@ -174,12 +180,23 @@ const AreasDashboard = ({
                   >
                     <div className="flex items-center">
                       <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500" />
-                      <div className="ml-4 flex-1">
-                        <h3 className="text-lg font-medium text-gray-900 truncate">
-                          {file.name}
-                        </h3>
-                        <p className="text-sm text-gray-500 truncate">
-                          {file.uploadedBy.email}
+                      <div className="ml-4 flex-1 min-w-0">
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <h3 className="text-lg font-medium text-gray-900 truncate">
+                                {file.name}
+                              </h3>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>{file.name}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                        <p className="text-sm text-gray-500">
+                          {format(new Date(file.createdAt), "dd/MM/yyyy", {
+                            locale: es,
+                          })}
                         </p>
                       </div>
                     </div>

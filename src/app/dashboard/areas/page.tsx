@@ -18,11 +18,7 @@ const Page = async () => {
     },
   }));
 
-  return (
-    <div className="container mx-auto p-8">
-      <AreaList isAdmin={isAdmin} />
-    </div>
-  );
+  return <AreaList isAdmin={isAdmin} />;
 };
 
 export default Page;

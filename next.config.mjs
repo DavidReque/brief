@@ -5,6 +5,9 @@ const nextConfig = {
     config.resolve.alias.encoding = false;
     return config;
   },
+  images: {
+    domains: [process.env.AWS_NAME_FOLDER],
+  },
 };
 
 export default nextConfig;
