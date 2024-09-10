@@ -13,6 +13,7 @@ import {
   Plus,
   ChevronDown,
   AreaChart,
+  User2,
 } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
@@ -33,7 +34,10 @@ const SideBar = ({ isAdmin }: DashboardProps) => {
     { name: "Configuración", icon: Settings, href: "/dashboard/settings" },
   ];
 
-  const { data: userAreas, isLoading } = trpc.getUserAreas.useQuery();
+  const { data: userAreas, isLoading: isLoadingAreas } =
+    trpc.getUserAreas.useQuery();
+  const { data: userData, isLoading: isLoadingUser } =
+    trpc.getCurrentUser.useQuery();
 
   useEffect(() => {
     const checkIfMobile = () => {
@@ -51,7 +55,7 @@ const SideBar = ({ isAdmin }: DashboardProps) => {
   const sidebarContent = (
     <div className="flex flex-col h-full">
       <div className="p-5">
-        <h2 className="text-xl font-bold text-gray-800">Mi Dashboard</h2>
+        <h2 className="text-xl font-bold text-gray-800">Inicio</h2>
       </div>
       <nav className="flex-1">
         {navItems.map((item) => (
@@ -98,7 +102,7 @@ const SideBar = ({ isAdmin }: DashboardProps) => {
           </button>
           {isAreasOpen && (
             <div className="mt-2 space-y-1">
-              {isLoading ? (
+              {isLoadingAreas ? (
                 <div className="text-center py-2">
                   <Loader2 className="h-4 w-4 animate-spin mx-auto" />
                 </div>
@@ -123,7 +127,23 @@ const SideBar = ({ isAdmin }: DashboardProps) => {
           )}
         </div>
       </nav>
-      <div className="p-5">
+      <div className="p-5 border-t border-gray-200">
+        {isLoadingUser ? (
+          <div className="text-center py-2">
+            <Loader2 className="h-4 w-4 animate-spin mx-auto" />
+          </div>
+        ) : userData ? (
+          <div className="flex items-center mb-4">
+            <div className="w-10 h-10 rounded-full flex items-center justify-center mr-3">
+              <User2 className="w-6 h-6" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-900">
+                {userData.email}
+              </p>
+            </div>
+          </div>
+        ) : null}
         <LogoutLink className="flex items-center text-red-600 hover:text-red-800 transition-colors duration-200">
           <LogOut className="w-5 h-5 mr-3" />
           <span className="text-sm">Cerrar sesión</span>

@@ -1,16 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { useToast } from "./ui/use-toast";
-import Image from "next/image";
 
 interface FileRendererProps {
   url: string;
   fileType: string;
 }
 
-const FileRenderer = ({ url, fileType }: FileRendererProps) => {
+const FileRenderer: React.FC<FileRendererProps> = ({ url, fileType }) => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -21,12 +20,12 @@ const FileRenderer = ({ url, fileType }: FileRendererProps) => {
         setLoading(false);
         setError(true);
         toast({
-          title: `Error al cargar el archivo ${fileType.toUpperCase()}`,
-          description: "El archivo tardó demasiado en cargar.",
+          title: `Error cargando ${fileType.toUpperCase()} archivo`,
+          description: "Error cargando el archivo.",
           variant: "destructive",
         });
       }
-    }, 10000); // 10 segundos de timeout
+    }, 15000);
 
     return () => clearTimeout(timer);
   }, [loading, toast, fileType]);
@@ -40,15 +39,18 @@ const FileRenderer = ({ url, fileType }: FileRendererProps) => {
     setError(true);
     console.error("Error loading file:", e);
     toast({
-      title: `Error al cargar el archivo ${fileType.toUpperCase()}`,
-      description:
-        "No se pudo cargar el archivo. Por favor, intenta nuevamente.",
+      title: `Error cargando ${fileType.toUpperCase()} archivo`,
+      description: "No se puede cargar el archivo. Por favor intenta de nuevo.",
       variant: "destructive",
     });
   };
 
   const getViewerUrl = () => {
-    if (fileType === "EXCEL" || fileType === "WORD") {
+    if (fileType === "EXCEL") {
+      return `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(
+        url
+      )}&wdAllowInteractivity=True&wdDownloadButton=True&wdInConfigurator=True`;
+    } else if (fileType === "WORD") {
       return `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(
         url
       )}`;
@@ -65,15 +67,15 @@ const FileRenderer = ({ url, fileType }: FileRendererProps) => {
       <div className="flex-1 w-full relative">
         {loading && !error && (
           <div className="absolute inset-0 flex justify-center items-center bg-white">
-            <Loader2 className="h-6 w-6 animate-spin" />
+            <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
           </div>
         )}
         {!error && fileType === "IMAGE" ? (
           <img
             src={url}
-            alt="Archivo subido"
+            alt="Uploaded file"
             onLoad={handleLoad}
-            className="rounded-md absolute inset-0 object-contain w-full h-full"
+            className="rounded-md object-contain w-full h-full"
             style={{ visibility: loading ? "hidden" : "visible" }}
           />
         ) : (
@@ -85,14 +87,17 @@ const FileRenderer = ({ url, fileType }: FileRendererProps) => {
               frameBorder="0"
               onLoad={handleLoad}
               onError={handleError}
-              className="rounded-md absolute inset-0"
+              className="rounded-md"
               style={{ visibility: loading ? "hidden" : "visible" }}
+              allowFullScreen
             />
           )
         )}
         {error && (
           <div className="flex justify-center items-center h-full">
-            <p className="text-red-600">No se pudo cargar el archivo</p>
+            <p className="text-red-600">
+              Error al cargar el archivo. Por favor intenta de nuevo.
+            </p>
           </div>
         )}
       </div>

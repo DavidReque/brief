@@ -90,6 +90,19 @@ export const appRouter = router({
 
       return file;
     }),
+  getCurrentUser: privateProcedure.query(({ ctx }) => {
+    const user = ctx.user;
+
+    if (!user) {
+      throw new Error("No authenticated user found");
+    }
+
+    return {
+      id: user.id,
+      email: user.email,
+      avatar: user.picture,
+    };
+  }),
   // procedimiento para que eliminar archivo
   deleteFile: privateProcedure
     .input(z.object({ id: z.string() }))
