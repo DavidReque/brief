@@ -88,10 +88,12 @@ const Dashboard = ({ isAdmin }: DashboardProps) => {
   return (
     <div className="flex h-screen bg-gray-100 overflow-hidden">
       <SideBar isAdmin={isAdmin} />
-      <main className="flex-1 overflow-y-auto p-8">
+      <main className="flex-1 overflow-y-auto p-8 mt-10">
         <div className="max-w-7xl mx-auto">
           <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">Mis archivos</h1>
+            <h1 className="mb-3 font-bold text-5xl text-gray-900">
+              Mis archivos
+            </h1>
             <UploadButton />
           </div>
 

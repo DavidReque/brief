@@ -43,9 +43,9 @@ const AreaList = ({ isAdmin }: AreaListProps) => {
   return (
     <div className="flex h-screen overflow-hidden">
       <SideBar isAdmin={isAdmin} />
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden mt-10">
         <div className="p-8 flex-shrink-0">
-          <h2 className="text-2xl font-bold mb-4">Lista de Áreas</h2>
+          <h2 className="text-2xl font-bold">Lista de Áreas</h2>
         </div>
         <div className="flex-1 overflow-y-auto px-8 pb-8">
           <ul className="space-y-4">

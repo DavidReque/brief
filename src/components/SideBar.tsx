@@ -154,6 +154,16 @@ const SideBar = ({ isAdmin }: DashboardProps) => {
 
   return (
     <>
+      <div
+        className={`md:hidden fixed top-0 left-0 right-0 h-[75px] z-40 flex items-center px-4`}
+      >
+        <button
+          onClick={toggleSidebar}
+          className="p-2 rounded-md hover:bg-gray-100"
+        >
+          {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+        </button>
+      </div>
       {isMobile && (
         <button
           onClick={toggleSidebar}
@@ -162,14 +172,20 @@ const SideBar = ({ isAdmin }: DashboardProps) => {
           {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
       )}
+      {isMobile && isOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-40"
+          onClick={toggleSidebar}
+        ></div>
+      )}
       <aside
         className={`${
           isMobile
             ? `fixed inset-y-0 left-0 transform ${
                 isOpen ? "translate-x-0" : "-translate-x-full"
-              } transition-transform duration-300 ease-in-out z-40`
+              } transition-transform duration-300 ease-in-out z-50`
             : "relative"
-        } w-64 bg-white border-r border-gray-200 shadow-lg`}
+        } w-64 bg-white border-r border-gray-200 shadow-lg h-full`}
       >
         {sidebarContent}
       </aside>

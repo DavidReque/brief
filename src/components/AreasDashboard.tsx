@@ -99,7 +99,7 @@ const AreasDashboard = ({
   return (
     <div className="flex h-screen bg-gray-100">
       <SideBar isAdmin={isAdmin} />
-      <main className="flex-1 mx-auto max-w-7xl p-4 md:p-10">
+      <main className="flex-1 mx-auto max-w-7xl p-4 mt-10">
         <div className="mt-8 flex flex-col items-start justify-between gap-4 border-b border-gray-200 pb-5 sm:flex-row sm:items-center sm:gap-0">
           <h1 className="mb-3 font-bold text-5xl text-gray-900">{areaName}</h1>
           <div className="flex items-center gap-4">

@@ -74,7 +74,7 @@ const CreateForm = ({ isAdmin }: Props) => {
   return (
     <div className="flex h-screen bg-gray-100">
       <SideBar isAdmin={true} />
-      <main className="flex-1 p-6">
+      <main className="flex-1 p-6 mt-10">
         <h1 className="text-2xl font-bold mb-6">Crear nueva área</h1>
         <div className="mb-4">
           <Input
