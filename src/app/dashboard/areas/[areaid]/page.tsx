@@ -17,7 +17,7 @@ const Page = async ({ params }: PageProps) => {
   const user = await getUser();
 
   if (!user) {
-    redirect("/login");
+    redirect("/");
   }
 
   const adminArea = await db.userArea.findFirst({

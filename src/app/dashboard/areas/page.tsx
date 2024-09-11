@@ -8,7 +8,7 @@ const Page = async () => {
   const user = await getUser();
 
   if (!user) {
-    redirect("/login");
+    redirect("/");
   }
 
   const isAdmin = !!(await db.userArea.findFirst({

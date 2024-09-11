@@ -16,7 +16,7 @@ const Page = async () => {
 
   const isAdmin = !!adminArea; // Convert to boolean
 
-  if (!user || !user.id) redirect("/auth-callback?origin=dashboard");
+  if (!user || !user.id) redirect("/");
 
   const dbUser = await db.user.findFirst({
     where: {
@@ -24,7 +24,7 @@ const Page = async () => {
     },
   });
 
-  if (!dbUser) redirect("/auth-callback?origin=dashboard");
+  if (!dbUser) redirect("/");
 
   return <Dashboard isAdmin={isAdmin} />;
 };
