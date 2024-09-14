@@ -1,11 +1,14 @@
 import MaxWithWrapper from "@/components/MaxWithWrapper";
 import Navbar from "@/components/Navbar";
-import { buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { RegisterLink } from "@kinde-oss/kinde-auth-nextjs/components";
+import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { ArrowBigRight } from "lucide-react";
+import Link from "next/link";
 
-export default function Home() {
-  // TODO: ocular botones de login y register si el usuario ya inicio sesion
+export default async function Home() {
+  const { getUser } = getKindeServerSession();
+  const user = await getUser();
   return (
     <>
       <Navbar />
@@ -22,15 +25,28 @@ export default function Home() {
           de manera segura.
         </h1>
 
-        <RegisterLink
-          className={buttonVariants({
-            size: "lg",
-            className: "mt-5",
-          })}
-          target="_blank"
-        >
-          Comencemos <ArrowBigRight className="ml-2 h-5 w-5" />
-        </RegisterLink>
+        {user ? (
+          <Link href="/dashboard">
+            <Button
+              className={buttonVariants({
+                size: "lg",
+                className: "mt-5",
+              })}
+            >
+              Comencemos <ArrowBigRight className="ml-2 h-5 w-5" />
+            </Button>
+          </Link>
+        ) : (
+          <RegisterLink
+            className={buttonVariants({
+              size: "lg",
+              className: "mt-5",
+            })}
+            target="_blank"
+          >
+            Comencemos <ArrowBigRight className="ml-2 h-5 w-5" />
+          </RegisterLink>
+        )}
       </MaxWithWrapper>
 
       {/* value proposition section */}

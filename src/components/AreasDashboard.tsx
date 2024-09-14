@@ -194,9 +194,7 @@ const AreasDashboard = ({
                           </Tooltip>
                         </TooltipProvider>
                         <p className="text-sm text-gray-500">
-                          {format(new Date(file.createdAt), "dd/MM/yyyy", {
-                            locale: es,
-                          })}
+                          {file.uploadedBy.email}
                         </p>
                       </div>
                     </div>

@@ -35,6 +35,12 @@ export const appRouter = router({
 
     return { success: true as const };
   }),
+  isAuthenticated: publicProcedure.query(async () => {
+    const { getUser } = getKindeServerSession();
+    const user = await getUser();
+
+    return !!user;
+  }),
   getUserFiles: privateProcedure.query(async ({ ctx }) => {
     const { user, userId } = ctx;
 

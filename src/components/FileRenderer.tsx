@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { useToast } from "./ui/use-toast";
@@ -63,21 +62,23 @@ const FileRenderer: React.FC<FileRendererProps> = ({ url, fileType }) => {
   };
 
   return (
-    <div className="w-full h-[calc(100vh-3.5rem)] bg-white rounded-md shadow flex flex-col items-center">
-      <div className="flex-1 w-full relative">
+    <div className="w-full h-[calc(100vh-3.5rem)] bg-gray-100 rounded-md shadow flex flex-col items-center justify-center p-4">
+      <div className="w-full h-full max-w-4xl max-h-[80vh] bg-white rounded-lg shadow-lg overflow-hidden relative">
         {loading && !error && (
-          <div className="absolute inset-0 flex justify-center items-center bg-white">
-            <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+          <div className="absolute inset-0 flex justify-center items-center bg-white bg-opacity-80 z-10">
+            <Loader2 className="h-12 w-12 animate-spin text-blue-500" />
           </div>
         )}
         {!error && fileType === "IMAGE" ? (
-          <img
-            src={url}
-            alt="Uploaded file"
-            onLoad={handleLoad}
-            className="rounded-md object-contain w-full h-full"
-            style={{ visibility: loading ? "hidden" : "visible" }}
-          />
+          <div className="w-full h-full flex items-center justify-center bg-gray-200">
+            <img
+              src={url}
+              alt="Uploaded file"
+              onLoad={handleLoad}
+              className="max-w-full max-h-full object-contain"
+              style={{ visibility: loading ? "hidden" : "visible" }}
+            />
+          </div>
         ) : (
           !error && (
             <iframe
@@ -87,7 +88,7 @@ const FileRenderer: React.FC<FileRendererProps> = ({ url, fileType }) => {
               frameBorder="0"
               onLoad={handleLoad}
               onError={handleError}
-              className="rounded-md"
+              className="rounded-lg"
               style={{ visibility: loading ? "hidden" : "visible" }}
               allowFullScreen
             />
@@ -95,7 +96,7 @@ const FileRenderer: React.FC<FileRendererProps> = ({ url, fileType }) => {
         )}
         {error && (
           <div className="flex justify-center items-center h-full">
-            <p className="text-red-600">
+            <p className="text-red-600 text-center px-4">
               Error al cargar el archivo. Por favor intenta de nuevo.
             </p>
           </div>
