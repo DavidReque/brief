@@ -26,8 +26,11 @@ const CreateForm = ({ isAdmin }: Props) => {
   const [areaDescription, setAreaDescription] = useState("");
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
 
-  // obtener todos los usuarios
+  // Obtener todos los usuarios
   const { data: users } = trpc.getAllUsers.useQuery();
+  // Obtener el usuario actual
+  const { data: currentUser } = trpc.getCurrentUser.useQuery();
+
   const createArea = trpc.createArea.useMutation({
     onSuccess: (data) => {
       toast({
@@ -71,6 +74,10 @@ const CreateForm = ({ isAdmin }: Props) => {
     );
   };
 
+  // Filtrar la lista de usuarios para excluir al usuario actual
+  const filteredUsers =
+    users?.filter((user) => user.id !== currentUser?.id) || [];
+
   return (
     <div className="flex h-screen bg-gray-100">
       <SideBar isAdmin={true} />
@@ -97,7 +104,7 @@ const CreateForm = ({ isAdmin }: Props) => {
               <SelectValue placeholder="Seleccionar usuario" />
             </SelectTrigger>
             <SelectContent>
-              {users?.map((user) => (
+              {filteredUsers.map((user) => (
                 <SelectItem key={user.id} value={user.id}>
                   {user.email}
                 </SelectItem>

@@ -47,7 +47,7 @@ enum FileType {
 
 const Dashboard = ({ isAdmin }: DashboardProps) => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [fileTypeFilter, setFileTypeFilter] = useState<FileType | "">("");
+  const [fileTypeFilter, setFileTypeFilter] = useState<FileType | "ALL">("ALL");
   const [dateFilter, setDateFilter] = useState<Date | undefined>(undefined);
 
   const [currentlyDeletingFile, setCurrentlyDeletingFile] = useState<
@@ -74,9 +74,8 @@ const Dashboard = ({ isAdmin }: DashboardProps) => {
     const matchesSearch = file.name
       .toLowerCase()
       .includes(searchQuery.toLowerCase());
-    const matchesFileType = fileTypeFilter
-      ? file.fileType === fileTypeFilter
-      : true;
+    const matchesFileType =
+      fileTypeFilter === "ALL" || file.fileType === fileTypeFilter;
     const matchesDate = dateFilter
       ? format(new Date(file.createdAt), "yyyy-MM-dd") ===
         format(dateFilter, "yyyy-MM-dd")
@@ -117,7 +116,7 @@ const Dashboard = ({ isAdmin }: DashboardProps) => {
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {dateFilter ? (
-                    format(dateFilter, "PPP")
+                    format(dateFilter, "PPP", { locale: es })
                   ) : (
                     <span>Seleccionar fecha</span>
                   )}
@@ -135,14 +134,14 @@ const Dashboard = ({ isAdmin }: DashboardProps) => {
             <Select
               value={fileTypeFilter}
               onValueChange={(value) =>
-                setFileTypeFilter(value as FileType | "")
+                setFileTypeFilter(value as FileType | "ALL")
               }
             >
               <SelectTrigger>
                 <SelectValue placeholder="Tipo de archivo" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Tipo de archivo">Todos los tipos</SelectItem>
+                <SelectItem value="ALL">Todos los tipos</SelectItem>
                 <SelectItem value={FileType.PDF}>PDF</SelectItem>
                 <SelectItem value={FileType.WORD}>Word</SelectItem>
                 <SelectItem value={FileType.EXCEL}>Excel</SelectItem>

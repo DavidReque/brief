@@ -56,7 +56,7 @@ const AreasDashboard = ({
   currentUserId,
 }: AreaDashboardProps) => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [fileTypeFilter, setFileTypeFilter] = useState<FileType | "">("");
+  const [fileTypeFilter, setFileTypeFilter] = useState<FileType | "ALL">("ALL");
   const [dateFilter, setDateFilter] = useState<Date | undefined>(undefined);
 
   const [currentlyDeletingFile, setCurrentlyDeletingFile] = useState<
@@ -85,9 +85,8 @@ const AreasDashboard = ({
     const matchesSearch =
       file.name.toLowerCase().includes(query) ||
       file.uploadedBy.email.toLowerCase().includes(query); // Filtrar por nombre de usuario
-    const matchesFileType = fileTypeFilter
-      ? file.fileType === fileTypeFilter
-      : true;
+    const matchesFileType =
+      fileTypeFilter === "ALL" || file.fileType === fileTypeFilter;
     const matchesDate = dateFilter
       ? format(new Date(file.createdAt), "yyyy-MM-dd") ===
         format(dateFilter, "yyyy-MM-dd")
@@ -144,13 +143,15 @@ const AreasDashboard = ({
           </Popover>
           <Select
             value={fileTypeFilter}
-            onValueChange={(value) => setFileTypeFilter(value as FileType | "")}
+            onValueChange={(value) =>
+              setFileTypeFilter(value as FileType | "ALL")
+            }
           >
             <SelectTrigger>
               <SelectValue placeholder="Tipo de archivo" />
             </SelectTrigger>
             <SelectContent>
-              <select value="">Todos los tipos</select>
+              <SelectItem value="ALL">Todos los tipos</SelectItem>
               <SelectItem value={FileType.PDF}>PDF</SelectItem>
               <SelectItem value={FileType.WORD}>Word</SelectItem>
               <SelectItem value={FileType.EXCEL}>Excel</SelectItem>

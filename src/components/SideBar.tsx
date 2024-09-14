@@ -53,7 +53,7 @@ const SideBar = ({ isAdmin }: DashboardProps) => {
   const toggleSidebar = () => setIsOpen(!isOpen);
 
   const sidebarContent = (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full overflow-y-auto">
       <div className="p-5">
         <h2 className="text-xl font-bold text-gray-800">Inicio</h2>
       </div>
@@ -155,7 +155,7 @@ const SideBar = ({ isAdmin }: DashboardProps) => {
   return (
     <>
       <div
-        className={`md:hidden fixed top-0 left-0 right-0 h-[75px] z-40 flex items-center px-4`}
+        className={`md:hidden fixed top-0 left-0 right-0 h-[75px] z-40 flex items-center px-4 bg-white`}
       >
         <button
           onClick={toggleSidebar}
@@ -165,16 +165,10 @@ const SideBar = ({ isAdmin }: DashboardProps) => {
         </button>
       </div>
       {isMobile && (
-        <button
-          onClick={toggleSidebar}
-          className="fixed top-4 left-4 z-50 p-2 bg-white rounded-md shadow-md"
-        >
-          {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-        </button>
-      )}
-      {isMobile && isOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40"
+          className={`fixed inset-0 bg-black bg-opacity-50 z-40 ${
+            isOpen ? "block" : "hidden"
+          }`}
           onClick={toggleSidebar}
         ></div>
       )}
@@ -185,7 +179,7 @@ const SideBar = ({ isAdmin }: DashboardProps) => {
                 isOpen ? "translate-x-0" : "-translate-x-full"
               } transition-transform duration-300 ease-in-out z-50`
             : "relative"
-        } w-64 bg-white border-r border-gray-200 shadow-lg h-full`}
+        } w-64 bg-white border-r border-gray-200 shadow-lg h-full overflow-hidden`}
       >
         {sidebarContent}
       </aside>
