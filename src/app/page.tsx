@@ -49,7 +49,6 @@ export default async function Home() {
         )}
       </MaxWithWrapper>
 
-      {/* value proposition section */}
       <div>
         <div className="relative isolate">
           <div

@@ -62,15 +62,15 @@ const FileRenderer: React.FC<FileRendererProps> = ({ url, fileType }) => {
   };
 
   return (
-    <div className="w-full h-[calc(100vh-3.5rem)] bg-gray-100 rounded-md shadow flex flex-col items-center justify-center p-4">
-      <div className="w-full h-full max-w-4xl max-h-[80vh] bg-white rounded-lg shadow-lg overflow-hidden relative">
+    <div className="w-full h-[calc(100vh-3.5rem)]  shadow flex flex-col items-center justify-center p-4">
+      <div className="w-full h-full max-w-4xl max-h-[80vh]  shadow-lg overflow-hidden relative">
         {loading && !error && (
           <div className="absolute inset-0 flex justify-center items-center bg-white bg-opacity-80 z-10">
             <Loader2 className="h-12 w-12 animate-spin text-blue-500" />
           </div>
         )}
         {!error && fileType === "IMAGE" ? (
-          <div className="w-full h-full flex items-center justify-center bg-gray-200">
+          <div className="w-full h-full flex items-center justify-center">
             <img
               src={url}
               alt="Uploaded file"
