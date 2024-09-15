@@ -27,7 +27,7 @@ const Page = async () => {
 
   if (!dbUser) redirect("/");
 
-  return <PDFGeneratorUploader />;
+  return <PDFGeneratorUploader isAdmin={isAdmin} />;
 };
 
 export default Page;

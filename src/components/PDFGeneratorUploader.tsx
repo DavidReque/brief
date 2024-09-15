@@ -8,11 +8,12 @@ import axios from "axios";
 import { Progress } from "./ui/progress";
 import {
   Cloud,
-  File,
   Loader2,
   X,
   Image as ImageIcon,
   Upload,
+  ChevronUp,
+  ChevronDown,
 } from "lucide-react";
 import { Button } from "./ui/button";
 import {
@@ -23,17 +24,30 @@ import {
   SelectValue,
 } from "./ui/select";
 import Dropzone from "react-dropzone";
+import SideBar from "./SideBar";
+import { useRouter } from "next/navigation";
+import { Input } from "./ui/input";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "./ui/tooltip";
 
-type Props = {};
+type Props = {
+  isAdmin: boolean;
+};
 
-const PDFGeneratorUploader = (props: Props) => {
+const PDFGeneratorUploader = ({ isAdmin }: Props) => {
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [selectedArea, setSelectedArea] = useState<string>("");
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [progress, setProgress] = useState<number>(0);
+  const [pdfName, setPdfName] = useState<string>("");
   const { toast } = useToast();
   const { data: areas } = trpc.getUserAreas.useQuery();
+  const router = useRouter();
 
   const handleImageDrop = useCallback((acceptedFiles: File[]) => {
     setSelectedImages((prevImages) => [...prevImages, ...acceptedFiles]);
@@ -83,6 +97,15 @@ const PDFGeneratorUploader = (props: Props) => {
       return;
     }
 
+    if (!pdfName.trim()) {
+      toast({
+        title: "Nombre del PDF no especificado",
+        description: "Por favor, ingresa un nombre para el PDF.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsGenerating(true);
     try {
       const pdfBlob = await generatePDF(selectedImages);
@@ -90,7 +113,7 @@ const PDFGeneratorUploader = (props: Props) => {
       setIsUploading(true);
 
       const formData = new FormData();
-      formData.append("file", pdfBlob, "generated_document.pdf");
+      formData.append("file", pdfBlob, `${pdfName}.pdf`);
       formData.append("areaId", selectedArea);
 
       const response = await axios.post("/api/upload", formData, {
@@ -107,7 +130,9 @@ const PDFGeneratorUploader = (props: Props) => {
           title: "Éxito",
           description: "PDF generado y cargado correctamente.",
         });
+        router.push(`/dashboard/${response.data.fileId}`);
         setSelectedImages([]);
+        setPdfName("");
       }
     } catch (error) {
       console.error("Error generating or uploading PDF:", error);
@@ -122,23 +147,59 @@ const PDFGeneratorUploader = (props: Props) => {
     }
   };
 
-  return (
-    <div className="flex h-screen bg-gray-100">
-      {/* Sidebar */}
-      <div className="w-64 bg-white shadow-md p-4 overflow-y-auto">
-        <h2 className="text-xl font-semibold mb-4">Imágenes seleccionadas</h2>
-        {selectedImages.length === 0 ? (
-          <p className="text-gray-500">No hay imágenes seleccionadas</p>
-        ) : (
-          selectedImages.map((file, index) => (
-            <div
-              key={index}
-              className="flex items-center justify-between mb-2 bg-gray-50 p-2 rounded"
-            >
-              <div className="flex items-center">
-                <ImageIcon className="h-4 w-4 mr-2 text-blue-500" />
-                <span className="text-sm truncate">{file.name}</span>
-              </div>
+  const moveImage = (index: number, direction: "up" | "down") => {
+    setSelectedImages((prevImages) => {
+      const newImages = [...prevImages];
+      const [removed] = newImages.splice(index, 1);
+      newImages.splice(direction === "up" ? index - 1 : index + 1, 0, removed);
+      return newImages;
+    });
+  };
+
+  const renderImageList = () => (
+    <div className="bg-white shadow-md rounded-lg p-4 mb-6">
+      <h2 className="text-xl font-semibold mb-4">Imágenes seleccionadas</h2>
+      {selectedImages.length === 0 ? (
+        <p className="text-gray-500">No hay imágenes seleccionadas</p>
+      ) : (
+        selectedImages.map((file, index) => (
+          <div
+            key={index}
+            className="flex items-center justify-between mb-2 bg-gray-50 p-2 rounded"
+          >
+            <div className="flex items-center">
+              <span className="mr-2 font-semibold">{index + 1}.</span>
+              <ImageIcon className="h-4 w-4 mr-2 text-blue-500" />
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <h3 className="text-lg font-medium text-gray-900 truncate max-w-[150px]">
+                      {file.name}
+                    </h3>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{file.name}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+            <div className="flex items-center">
+              <button
+                onClick={() => index > 0 && moveImage(index, "up")}
+                disabled={index === 0}
+                className="text-gray-500 hover:text-gray-700 disabled:opacity-50 mr-2"
+              >
+                <ChevronUp className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() =>
+                  index < selectedImages.length - 1 && moveImage(index, "down")
+                }
+                disabled={index === selectedImages.length - 1}
+                className="text-gray-500 hover:text-gray-700 disabled:opacity-50 mr-2"
+              >
+                <ChevronDown className="h-4 w-4" />
+              </button>
               <button
                 onClick={() => removeImage(index)}
                 className="text-red-500 hover:text-red-700"
@@ -146,13 +207,27 @@ const PDFGeneratorUploader = (props: Props) => {
                 <X className="h-4 w-4" />
               </button>
             </div>
-          ))
-        )}
-      </div>
+          </div>
+        ))
+      )}
+    </div>
+  );
 
+  return (
+    <div className="flex flex-col md:flex-row h-screen bg-gray-100">
+      <SideBar isAdmin={isAdmin} />
       {/* Main content */}
-      <div className="flex-1 p-8">
+      <div className="flex-1 p-8 order-1 md:order-1">
         <h1 className="text-2xl font-bold mb-6">Generador de PDF</h1>
+
+        <h1 className="text-sm font-bold mb-3">Nombre del PDF</h1>
+        <Input
+          type="text"
+          placeholder="Nombre del PDF"
+          value={pdfName}
+          onChange={(e) => setPdfName(e.target.value)}
+          className="mb-4"
+        />
 
         <div className="bg-white shadow-md rounded-lg p-6 mb-6">
           <Dropzone
@@ -226,6 +301,11 @@ const PDFGeneratorUploader = (props: Props) => {
             </p>
           </div>
         )}
+      </div>
+
+      {/* Sidebar with image list */}
+      <div className="w-full md:w-[320px] bg-white shadow-md p-4 overflow-y-auto order-2 md:order-2">
+        {renderImageList()}
       </div>
     </div>
   );

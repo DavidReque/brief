@@ -34,6 +34,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "./ui/tooltip";
+import ScanButton from "./ScanButton";
 
 interface AreaDashboardProps {
   areaId: string;
@@ -105,6 +106,8 @@ const AreasDashboard = ({
             <UploadButton />
           </div>
         </div>
+
+        <ScanButton />
 
         {/* Filtros */}
         <div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
