@@ -62,9 +62,29 @@ const PDFGeneratorUploader = ({ isAdmin }: Props) => {
     for (let i = 0; i < images.length; i++) {
       if (i > 0) pdf.addPage();
       const image = await loadImage(images[i]);
-      pdf.addImage(image as string, "JPEG", 10, 10, 190, 280);
+      const format = getImageFormat(images[i]);
+      pdf.addImage(image as string, format, 10, 10, 190, 280);
     }
     return pdf.output("blob");
+  };
+
+  const getImageFormat = (image: File): string => {
+    const extension = image.name.split(".").pop()?.toLowerCase();
+    switch (extension) {
+      case "jpeg":
+      case "jpg":
+        return "JPEG";
+      case "png":
+        return "PNG";
+      case "gif":
+        return "GIF";
+      case "bmp":
+        return "BMP";
+      case "svg":
+        return "SVG";
+      default:
+        throw new Error("Formato de imagen no soportado");
+    }
   };
 
   const loadImage = (file: File): Promise<string> => {
@@ -216,7 +236,7 @@ const PDFGeneratorUploader = ({ isAdmin }: Props) => {
   return (
     <div className="flex flex-col md:flex-row h-screen bg-gray-100">
       <SideBar isAdmin={isAdmin} />
-      {/* Main content */}
+      {/* Main */}
       <div className="flex-1 p-8 order-1 md:order-1">
         <h1 className="text-2xl font-bold mb-6">Generador de PDF</h1>
 
@@ -303,7 +323,7 @@ const PDFGeneratorUploader = ({ isAdmin }: Props) => {
         )}
       </div>
 
-      {/* Sidebar with image list */}
+      {/* Sidebar con lista de imagenes  */}
       <div className="w-full md:w-[320px] bg-white shadow-md p-4 overflow-y-auto order-2 md:order-2">
         {renderImageList()}
       </div>
