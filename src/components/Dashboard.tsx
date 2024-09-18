@@ -44,6 +44,7 @@ enum FileType {
   PDF = "PDF",
   WORD = "WORD",
   EXCEL = "EXCEL",
+  IMAGE = "IMAGE",
 }
 
 const Dashboard = ({ isAdmin }: DashboardProps) => {
@@ -148,6 +149,7 @@ const Dashboard = ({ isAdmin }: DashboardProps) => {
                 <SelectItem value={FileType.PDF}>PDF</SelectItem>
                 <SelectItem value={FileType.WORD}>Word</SelectItem>
                 <SelectItem value={FileType.EXCEL}>Excel</SelectItem>
+                <SelectItem value={FileType.IMAGE}>Imagen</SelectItem>
               </SelectContent>
             </Select>
           </div>
