@@ -33,7 +33,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "./ui/tooltip";
-import ScanButton from "./ScanButton";
 
 interface DashboardProps {
   isAdmin: boolean;
@@ -98,8 +97,6 @@ const Dashboard = ({ isAdmin }: DashboardProps) => {
             <UploadButton />
           </div>
 
-          <ScanButton />
-
           {/* Filtros */}
           <div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="relative">
@@ -149,7 +146,7 @@ const Dashboard = ({ isAdmin }: DashboardProps) => {
                 <SelectItem value={FileType.PDF}>PDF</SelectItem>
                 <SelectItem value={FileType.WORD}>Word</SelectItem>
                 <SelectItem value={FileType.EXCEL}>Excel</SelectItem>
-                <SelectItem value={FileType.IMAGE}>Imagen</SelectItem>
+                <SelectItem value={FileType.IMAGE}>Excel</SelectItem>
               </SelectContent>
             </Select>
           </div>

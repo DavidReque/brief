@@ -18,6 +18,7 @@ import {
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { LogoutLink } from "@kinde-oss/kinde-auth-nextjs/components";
+import ScanButton from "./ScanButton";
 
 interface DashboardProps {
   isAdmin: boolean;
@@ -55,7 +56,10 @@ const SideBar = ({ isAdmin }: DashboardProps) => {
   const sidebarContent = (
     <div className="flex flex-col h-full overflow-y-auto">
       <div className="p-5">
-        <h2 className="text-xl font-bold text-gray-800">Inicio</h2>
+        <h2 className="text-xl font-bold text-gray-800">Dashboard</h2>
+      </div>
+      <div className="px-3 mb-4">
+        <ScanButton />
       </div>
       <nav className="flex-1">
         {navItems.map((item) => (

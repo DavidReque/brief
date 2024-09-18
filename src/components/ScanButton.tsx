@@ -17,12 +17,13 @@ const ScanButton = (props: Props) => {
         <TooltipTrigger asChild>
           <Link
             href="/dashboard/scann"
-            className="fixed bottom-12 right-4 lg:right-8 xl:right-12 z-50 bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition-all duration-200"
+            className="flex items-center px-3 py-2 text-sm font-medium text-gray-600 rounded-full hover:bg-gray-100 transition-colors duration-200"
           >
-            <Plus className="h-6 w-6" />
+            <Plus className="h-5 w-5 mr-2" />
+            <span>Nuevo documento</span>
           </Link>
         </TooltipTrigger>
-        <TooltipContent>Escanear documento</TooltipContent>
+        <TooltipContent>Nuevo documento</TooltipContent>
       </Tooltip>
     </TooltipProvider>
   );
