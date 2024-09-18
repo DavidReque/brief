@@ -29,11 +29,7 @@ const SideBar = ({ isAdmin }: DashboardProps) => {
   const [isMobile, setIsMobile] = useState(false);
   const [isAreasOpen, setIsAreasOpen] = useState(true);
 
-  const navItems = [
-    { name: "Inicio", icon: Home, href: "/dashboard" },
-    { name: "Perfil", icon: User, href: "/dashboard/profile" },
-    { name: "Configuración", icon: Settings, href: "/dashboard/settings" },
-  ];
+  const navItems = [{ name: "Inicio", icon: Home, href: "/dashboard" }];
 
   const { data: userAreas, isLoading: isLoadingAreas } =
     trpc.getUserAreas.useQuery();

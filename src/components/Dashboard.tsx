@@ -146,7 +146,7 @@ const Dashboard = ({ isAdmin }: DashboardProps) => {
                 <SelectItem value={FileType.PDF}>PDF</SelectItem>
                 <SelectItem value={FileType.WORD}>Word</SelectItem>
                 <SelectItem value={FileType.EXCEL}>Excel</SelectItem>
-                <SelectItem value={FileType.IMAGE}>Excel</SelectItem>
+                <SelectItem value={FileType.IMAGE}>Imagen</SelectItem>
               </SelectContent>
             </Select>
           </div>
