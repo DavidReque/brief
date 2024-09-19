@@ -177,7 +177,7 @@ const PDFGeneratorUploader = ({ isAdmin }: Props) => {
   };
 
   const renderImageList = () => (
-    <div className="bg-white shadow-md rounded-lg p-4 mb-6">
+    <div className=" bg-white shadow-md rounded-lg p-4 mb-6">
       <h2 className="text-xl font-semibold mb-4">Imágenes seleccionadas</h2>
       {selectedImages.length === 0 ? (
         <p className="text-gray-500">No hay imágenes seleccionadas</p>
@@ -189,11 +189,11 @@ const PDFGeneratorUploader = ({ isAdmin }: Props) => {
           >
             <div className="flex items-center">
               <span className="mr-2 font-semibold">{index + 1}.</span>
-              <ImageIcon className="h-4 w-4 mr-2 text-blue-500" />
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <h3 className="text-lg font-medium text-gray-900 truncate max-w-[150px]">
+                    {/* Se incrementa el tamaño máximo y se añade el truncate */}
+                    <h3 className="text-lg font-medium text-gray-900 max-w-[250px]">
                       {file.name}
                     </h3>
                   </TooltipTrigger>
@@ -203,6 +203,7 @@ const PDFGeneratorUploader = ({ isAdmin }: Props) => {
                 </Tooltip>
               </TooltipProvider>
             </div>
+
             <div className="flex items-center">
               <button
                 onClick={() => index > 0 && moveImage(index, "up")}
@@ -236,8 +237,8 @@ const PDFGeneratorUploader = ({ isAdmin }: Props) => {
   return (
     <div className="flex flex-col md:flex-row h-screen bg-gray-100">
       <SideBar isAdmin={isAdmin} />
-      {/* Main */}
-      <div className="flex-1 p-8 order-1 md:order-1">
+      {/* Main content */}
+      <div className="flex-1 p-8 order-1 md:order-1 overflow-y-auto">
         <h1 className="text-2xl font-bold mb-6">Generador de PDF</h1>
 
         <h1 className="text-sm font-bold mb-3">Nombre del PDF</h1>

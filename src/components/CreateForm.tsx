@@ -82,7 +82,7 @@ const CreateForm = ({ isAdmin }: Props) => {
   return (
     <div className="flex h-screen bg-gray-100">
       <SideBar isAdmin={isAdmin} />
-      <main className="flex-1 p-6 overflow-auto">
+      <main className="flex-1 p-6 overflow-auto mt-12">
         <Card className="max-w-2xl mx-auto">
           <CardHeader>
             <CardTitle className="text-2xl font-bold">

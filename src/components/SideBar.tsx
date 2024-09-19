@@ -1,12 +1,11 @@
 "use client";
 
+import React, { useState, useEffect } from "react";
 import { trpc } from "@/app/_trpc/client";
 import {
   Folder,
   Home,
   Loader2,
-  Settings,
-  User,
   Menu,
   X,
   LogOut,
@@ -16,20 +15,43 @@ import {
   User2,
 } from "lucide-react";
 import Link from "next/link";
-import { useState, useEffect } from "react";
 import { LogoutLink } from "@kinde-oss/kinde-auth-nextjs/components";
 import ScanButton from "./ScanButton";
+import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface DashboardProps {
   isAdmin: boolean;
 }
 
-const SideBar = ({ isAdmin }: DashboardProps) => {
+interface NavItem {
+  name: string;
+  icon: React.ComponentType<{ className?: string }>;
+  href: string;
+}
+
+interface Area {
+  id: string;
+  name: string;
+}
+
+interface User {
+  email: string;
+}
+
+const SideBar: React.FC<DashboardProps> = ({ isAdmin }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isAreasOpen, setIsAreasOpen] = useState(true);
 
-  const navItems = [{ name: "Inicio", icon: Home, href: "/dashboard" }];
+  const navItems: NavItem[] = [
+    { name: "Inicio", icon: Home, href: "/dashboard" },
+  ];
 
   const { data: userAreas, isLoading: isLoadingAreas } =
     trpc.getUserAreas.useQuery();
@@ -49,49 +71,63 @@ const SideBar = ({ isAdmin }: DashboardProps) => {
 
   const toggleSidebar = () => setIsOpen(!isOpen);
 
-  const sidebarContent = (
-    <div className="flex flex-col h-full overflow-y-auto">
-      <div className="p-5">
-        <h2 className="text-xl font-bold text-gray-800">Dashboard</h2>
-      </div>
-      <div className="px-3 mb-4">
-        <ScanButton />
-      </div>
-      <nav className="flex-1">
-        {navItems.map((item) => (
+  const NavItemComponent: React.FC<{ item: NavItem; onClick: () => void }> = ({
+    item,
+    onClick,
+  }) => (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
           <Link
-            key={item.name}
             href={item.href}
-            className="flex items-center px-5 py-3 text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors duration-200"
-            onClick={() => isMobile && setIsOpen(false)}
+            className="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 hover:text-blue-600 rounded-lg transition-colors duration-200"
+            onClick={onClick}
           >
             <item.icon className="w-5 h-5 mr-3" />
-            <span className="text-sm">{item.name}</span>
+            <span className="text-sm font-medium">{item.name}</span>
           </Link>
+        </TooltipTrigger>
+        <TooltipContent side="right">
+          <p>{item.name}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+
+  const sidebarContent = (
+    <div className="flex flex-col h-full bg-white">
+      <div className="p-5 border-b border-gray-200">
+        <h2 className="text-2xl font-bold text-gray-800">Dashboard</h2>
+      </div>
+      <div className="px-4 py-4">
+        <ScanButton />
+      </div>
+      <nav className="flex-1 px-2 space-y-1 overflow-y-auto">
+        {navItems.map((item) => (
+          <NavItemComponent
+            key={item.name}
+            item={item}
+            onClick={() => isMobile && setIsOpen(false)}
+          />
         ))}
 
         {isAdmin && (
-          <Link
-            className="flex items-center px-5 py-3 text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors duration-200"
-            href="/create"
-          >
-            <Plus className="w-5 h-5 mr-3" />
-            <span className="text-sm">Crear Área</span>
-          </Link>
+          <NavItemComponent
+            item={{ name: "Crear Área", icon: Plus, href: "/create" }}
+            onClick={() => isMobile && setIsOpen(false)}
+          />
         )}
 
-        <Link
-          className="flex items-center px-5 py-3 text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors duration-200"
-          href="/dashboard/areas"
-        >
-          <AreaChart className="w-5 h-5 mr-3" />
-          <span className="text-sm">Areas</span>
-        </Link>
+        <NavItemComponent
+          item={{ name: "Áreas", icon: AreaChart, href: "/dashboard/areas" }}
+          onClick={() => isMobile && setIsOpen(false)}
+        />
 
-        <div className="mt-4 px-5">
-          <button
+        <div className="mt-4">
+          <Button
+            variant="ghost"
             onClick={() => setIsAreasOpen(!isAreasOpen)}
-            className="flex items-center justify-between w-full text-left text-gray-600 hover:text-gray-900"
+            className="flex items-center justify-between w-full text-left text-gray-700 hover:text-blue-600 hover:bg-gray-100"
           >
             <span className="text-sm font-medium">Mis Áreas</span>
             <ChevronDown
@@ -99,7 +135,7 @@ const SideBar = ({ isAdmin }: DashboardProps) => {
                 isAreasOpen ? "transform rotate-180" : ""
               }`}
             />
-          </button>
+          </Button>
           {isAreasOpen && (
             <div className="mt-2 space-y-1">
               {isLoadingAreas ? (
@@ -108,15 +144,15 @@ const SideBar = ({ isAdmin }: DashboardProps) => {
                 </div>
               ) : userAreas && userAreas.length > 0 ? (
                 userAreas.map((area) => (
-                  <Link
+                  <NavItemComponent
                     key={area.id}
-                    href={`/dashboard/areas/${area.id}`}
-                    className="flex items-center pl-8 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors duration-200"
+                    item={{
+                      name: area.name,
+                      icon: Folder,
+                      href: `/dashboard/areas/${area.id}`,
+                    }}
                     onClick={() => isMobile && setIsOpen(false)}
-                  >
-                    <Folder className="w-4 h-4 mr-3" />
-                    <span className="truncate">{area.name}</span>
-                  </Link>
+                  />
                 ))
               ) : (
                 <div className="text-sm text-gray-500 pl-8 py-2">
@@ -127,7 +163,7 @@ const SideBar = ({ isAdmin }: DashboardProps) => {
           )}
         </div>
       </nav>
-      <div className="p-5 border-t border-gray-200">
+      <div className="p-4 border-t border-gray-200">
         {isLoadingUser ? (
           <div className="text-center py-2">
             <Loader2 className="h-4 w-4 animate-spin mx-auto" />
@@ -144,9 +180,9 @@ const SideBar = ({ isAdmin }: DashboardProps) => {
             </div>
           </div>
         ) : null}
-        <LogoutLink className="flex items-center text-red-600 hover:text-red-800 transition-colors duration-200">
+        <LogoutLink className="flex items-center text-red-600 hover:text-red-800 hover:bg-red-100 px-3 py-2 rounded-lg transition-colors duration-200">
           <LogOut className="w-5 h-5 mr-3" />
-          <span className="text-sm">Cerrar sesión</span>
+          <span className="text-sm font-medium">Cerrar sesión</span>
         </LogoutLink>
       </div>
     </div>
@@ -155,14 +191,16 @@ const SideBar = ({ isAdmin }: DashboardProps) => {
   return (
     <>
       <div
-        className={`md:hidden fixed top-0 left-0 right-0 h-[75px] z-40 flex items-center px-4 bg-white`}
+        className={`md:hidden fixed top-0 left-0 right-0 h-[75px] z-40 flex items-center px-4`}
       >
-        <button
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={toggleSidebar}
           className="p-2 rounded-md hover:bg-gray-100"
         >
           {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-        </button>
+        </Button>
       </div>
       {isMobile && (
         <div

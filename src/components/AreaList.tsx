@@ -63,7 +63,7 @@ const AreaList = ({ isAdmin }: AreaListProps) => {
   return (
     <div className="flex h-screen overflow-hidden bg-gray-100">
       <SideBar isAdmin={isAdmin} />
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden mt-12">
         <main className="flex-1 overflow-y-auto px-6 py-8">
           <div className="max-w-5xl mx-auto">
             <div className="flex justify-between items-center mb-6">
