@@ -3,17 +3,17 @@
 import React, { useCallback, useState } from "react";
 import { useToast } from "./ui/use-toast";
 import { trpc } from "@/app/_trpc/client";
-import { jsPDF } from "jspdf";
+import { PDFDocument, rgb } from "pdf-lib";
 import axios from "axios";
 import { Progress } from "./ui/progress";
 import {
   Cloud,
   Loader2,
   X,
-  Image as ImageIcon,
   Upload,
   ChevronUp,
   ChevronDown,
+  ImageIcon,
 } from "lucide-react";
 import { Button } from "./ui/button";
 import {
@@ -33,6 +33,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "./ui/tooltip";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 
 type Props = {
   isAdmin: boolean;
@@ -58,42 +59,33 @@ const PDFGeneratorUploader = ({ isAdmin }: Props) => {
   };
 
   const generatePDF = async (images: File[]): Promise<Blob> => {
-    const pdf = new jsPDF();
-    for (let i = 0; i < images.length; i++) {
-      if (i > 0) pdf.addPage();
-      const image = await loadImage(images[i]);
-      const format = getImageFormat(images[i]);
-      pdf.addImage(image as string, format, 10, 10, 190, 280);
-    }
-    return pdf.output("blob");
-  };
+    const pdfDoc = await PDFDocument.create();
 
-  const getImageFormat = (image: File): string => {
-    const extension = image.name.split(".").pop()?.toLowerCase();
-    switch (extension) {
-      case "jpeg":
-      case "jpg":
-        return "JPEG";
-      case "png":
-        return "PNG";
-      case "gif":
-        return "GIF";
-      case "bmp":
-        return "BMP";
-      case "svg":
-        return "SVG";
-      default:
+    for (const file of images) {
+      const page = pdfDoc.addPage([600, 800]);
+
+      const imageBytes = await file.arrayBuffer();
+      let image;
+
+      const format = file.type.split("/")[1];
+      if (format === "jpeg" || format === "jpg") {
+        image = await pdfDoc.embedJpg(imageBytes);
+      } else if (format === "png") {
+        image = await pdfDoc.embedPng(imageBytes);
+      } else {
         throw new Error("Formato de imagen no soportado");
-    }
-  };
+      }
 
-  const loadImage = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = (event) => resolve(event.target?.result as string);
-      reader.onerror = (error) => reject(error);
-      reader.readAsDataURL(file);
-    });
+      page.drawImage(image, {
+        x: 50,
+        y: 150,
+        width: 500,
+        height: 500,
+      });
+    }
+
+    const pdfBytes = await pdfDoc.save();
+    return new Blob([pdfBytes], { type: "application/pdf" });
   };
 
   const handleGenerateAndUpload = async () => {
@@ -177,156 +169,191 @@ const PDFGeneratorUploader = ({ isAdmin }: Props) => {
   };
 
   const renderImageList = () => (
-    <div className=" bg-white shadow-md rounded-lg p-4 mb-6">
-      <h2 className="text-xl font-semibold mb-4">Imágenes seleccionadas</h2>
-      {selectedImages.length === 0 ? (
-        <p className="text-gray-500">No hay imágenes seleccionadas</p>
-      ) : (
-        selectedImages.map((file, index) => (
-          <div
-            key={index}
-            className="flex items-center justify-between mb-2 bg-gray-50 p-2 rounded"
-          >
-            <div className="flex items-center">
-              <span className="mr-2 font-semibold">{index + 1}.</span>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    {/* Se incrementa el tamaño máximo y se añade el truncate */}
-                    <h3 className="text-lg font-medium text-gray-900 max-w-[250px]">
-                      {file.name}
-                    </h3>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>{file.name}</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </div>
+    <Card className="mb-6">
+      <CardHeader>
+        <CardTitle>Imágenes seleccionadas</CardTitle>
+      </CardHeader>
+      <CardContent>
+        {selectedImages.length === 0 ? (
+          <p className="text-gray-500">No hay imágenes seleccionadas</p>
+        ) : (
+          <div className="space-y-2">
+            {selectedImages.map((file, index) => (
+              <div
+                key={index}
+                className="flex items-center justify-between p-2 bg-gray-50 rounded-md"
+              >
+                <div className="flex items-center space-x-2">
+                  <ImageIcon className="h-5 w-5 text-gray-500" />
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <h3 className="text-sm font-medium text-gray-900 max-w-[200px] truncate">
+                          {file.name}
+                        </h3>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{file.name}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
 
-            <div className="flex items-center">
-              <button
-                onClick={() => index > 0 && moveImage(index, "up")}
-                disabled={index === 0}
-                className="text-gray-500 hover:text-gray-700 disabled:opacity-50 mr-2"
-              >
-                <ChevronUp className="h-4 w-4" />
-              </button>
-              <button
-                onClick={() =>
-                  index < selectedImages.length - 1 && moveImage(index, "down")
-                }
-                disabled={index === selectedImages.length - 1}
-                className="text-gray-500 hover:text-gray-700 disabled:opacity-50 mr-2"
-              >
-                <ChevronDown className="h-4 w-4" />
-              </button>
-              <button
-                onClick={() => removeImage(index)}
-                className="text-red-500 hover:text-red-700"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
+                <div className="flex items-center space-x-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => index > 0 && moveImage(index, "up")}
+                    disabled={index === 0}
+                  >
+                    <ChevronUp className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() =>
+                      index < selectedImages.length - 1 &&
+                      moveImage(index, "down")
+                    }
+                    disabled={index === selectedImages.length - 1}
+                  >
+                    <ChevronDown className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removeImage(index)}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            ))}
           </div>
-        ))
-      )}
-    </div>
+        )}
+      </CardContent>
+    </Card>
   );
 
   return (
-    <div className="flex flex-col md:flex-row h-screen bg-gray-100">
+    <div className="flex h-screen bg-gray-100">
       <SideBar isAdmin={isAdmin} />
-      {/* Main content */}
-      <div className="flex-1 p-8 order-1 md:order-1 overflow-y-auto">
-        <h1 className="text-2xl font-bold mb-6">Generador de PDF</h1>
+      <div className="flex-1 p-8 overflow-y-auto">
+        <h1 className="text-3xl font-bold mb-6">Generador de PDF</h1>
 
-        <h1 className="text-sm font-bold mb-3">Nombre del PDF</h1>
-        <Input
-          type="text"
-          placeholder="Nombre del PDF"
-          value={pdfName}
-          onChange={(e) => setPdfName(e.target.value)}
-          className="mb-4"
-        />
-
-        <div className="bg-white shadow-md rounded-lg p-6 mb-6">
-          <Dropzone
-            onDrop={handleImageDrop}
-            accept={{ "image/*": [".jpeg", ".png", ".jpg"] }}
-          >
-            {({ getRootProps, getInputProps }) => (
-              <div
-                {...getRootProps()}
-                className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:bg-gray-50 transition duration-300"
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle>Configuración del PDF</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <label
+                htmlFor="pdfName"
+                className="block text-sm font-medium text-gray-700 mb-1"
               >
-                <input {...getInputProps()} />
-                <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                <p className="text-gray-600">
-                  Arrastra y suelta imágenes aquí, o haz clic para seleccionar
-                  archivos
-                </p>
-              </div>
-            )}
-          </Dropzone>
-        </div>
+                Nombre del PDF
+              </label>
+              <Input
+                id="pdfName"
+                type="text"
+                placeholder="Ingrese el nombre del PDF"
+                value={pdfName}
+                onChange={(e) => setPdfName(e.target.value)}
+              />
+            </div>
 
-        <div className="bg-white shadow-md rounded-lg p-6 mb-6">
-          <Select value={selectedArea} onValueChange={setSelectedArea}>
-            <SelectTrigger className="w-full mb-4">
-              <SelectValue placeholder="Seleccionar área" />
-            </SelectTrigger>
-            <SelectContent>
-              {areas?.map((area) => (
-                <SelectItem key={area.id} value={area.id}>
-                  {area.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            <div>
+              <label
+                htmlFor="area"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Área
+              </label>
+              <Select onValueChange={(value) => setSelectedArea(value)}>
+                <SelectTrigger id="area" className="w-full">
+                  <SelectValue placeholder="Selecciona un área" />
+                </SelectTrigger>
+                <SelectContent>
+                  {areas?.map((area) => (
+                    <SelectItem key={area.id} value={area.id}>
+                      {area.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </CardContent>
+        </Card>
 
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle>Subir imágenes</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Dropzone
+              onDrop={handleImageDrop}
+              accept={{ "image/*": [".jpeg", ".png", ".jpg"] }}
+            >
+              {({ getRootProps, getInputProps }) => (
+                <div
+                  {...getRootProps()}
+                  className="border-dashed border-2 border-gray-300 p-6 text-center cursor-pointer rounded-md hover:bg-gray-50 transition-colors"
+                >
+                  <input {...getInputProps()} />
+                  <Upload className="mx-auto h-12 w-12 text-gray-400" />
+                  <p className="mt-2 text-sm text-gray-600">
+                    Arrastra imágenes aquí o haz clic para seleccionarlas.
+                  </p>
+                  <p className="mt-1 text-xs text-gray-500">
+                    Solo imágenes (.jpeg, .jpg, .png)
+                  </p>
+                </div>
+              )}
+            </Dropzone>
+          </CardContent>
+        </Card>
+
+        {renderImageList()}
+
+        <div className="mt-6">
           <Button
             onClick={handleGenerateAndUpload}
+            className="w-full"
             disabled={
               isGenerating ||
               isUploading ||
+              !selectedArea ||
               selectedImages.length === 0 ||
-              !selectedArea
+              !pdfName.trim()
             }
-            className="w-full"
           >
             {isGenerating ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Generando PDF...
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generando
+                PDF...
               </>
             ) : isUploading ? (
               <>
-                <Cloud className="mr-2 h-4 w-4" />
-                Subiendo PDF...
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Subiendo
+                PDF...
               </>
             ) : (
               <>
-                <Upload className="mr-2 h-4 w-4" />
-                Generar y Subir PDF
+                <Cloud className="mr-2 h-4 w-4" /> Generar y Subir PDF
               </>
             )}
           </Button>
         </div>
 
-        {(isGenerating || isUploading) && (
-          <div className="bg-white shadow-md rounded-lg p-6">
+        {isUploading && (
+          <div className="mt-4">
             <Progress value={progress} className="w-full" />
-            <p className="text-center mt-2">
-              {isGenerating ? "Generando PDF..." : "Subiendo PDF..."}
+            <p className="text-center text-sm text-gray-600 mt-2">
+              Subiendo: {progress}%
             </p>
           </div>
         )}
-      </div>
-
-      {/* Sidebar con lista de imagenes  */}
-      <div className="w-full md:w-[320px] bg-white shadow-md p-4 overflow-y-auto order-2 md:order-2">
-        {renderImageList()}
       </div>
     </div>
   );
