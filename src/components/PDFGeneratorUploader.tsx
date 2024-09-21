@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useToast } from "./ui/use-toast";
 import { trpc } from "@/app/_trpc/client";
 import { PDFDocument, rgb } from "pdf-lib";
@@ -14,6 +14,7 @@ import {
   ChevronUp,
   ChevronDown,
   ImageIcon,
+  Eye,
 } from "lucide-react";
 import { Button } from "./ui/button";
 import {
@@ -34,6 +35,13 @@ import {
   TooltipTrigger,
 } from "./ui/tooltip";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "./ui/dialog";
 
 type Props = {
   isAdmin: boolean;
@@ -44,11 +52,20 @@ const PDFGeneratorUploader = ({ isAdmin }: Props) => {
   const [selectedArea, setSelectedArea] = useState<string>("");
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [isUploading, setIsUploading] = useState<boolean>(false);
+  const [previewPdfUrl, setPreviewPdfUrl] = useState<string | null>(null);
   const [progress, setProgress] = useState<number>(0);
   const [pdfName, setPdfName] = useState<string>("");
   const { toast } = useToast();
   const { data: areas } = trpc.getUserAreas.useQuery();
   const router = useRouter();
+
+  useEffect(() => {
+    return () => {
+      if (previewPdfUrl) {
+        URL.revokeObjectURL(previewPdfUrl);
+      }
+    };
+  }, [previewPdfUrl]);
 
   const handleImageDrop = useCallback((acceptedFiles: File[]) => {
     setSelectedImages((prevImages) => [...prevImages, ...acceptedFiles]);
@@ -86,6 +103,34 @@ const PDFGeneratorUploader = ({ isAdmin }: Props) => {
 
     const pdfBytes = await pdfDoc.save();
     return new Blob([pdfBytes], { type: "application/pdf" });
+  };
+
+  const handleGeneratePreview = async () => {
+    if (selectedImages.length === 0) {
+      toast({
+        title: "No hay imágenes seleccionadas",
+        description:
+          "Por favor, selecciona al menos una imagen para generar la previsualización del PDF.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsGenerating(true);
+    try {
+      const pdfBlob = await generatePDF(selectedImages);
+      const pdfUrl = URL.createObjectURL(pdfBlob);
+      setPreviewPdfUrl(pdfUrl);
+    } catch (error) {
+      console.error("Error generating PDF preview:", error);
+      toast({
+        title: "Error",
+        description: "Hubo un problema al generar la previsualización del PDF.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const handleGenerateAndUpload = async () => {
@@ -145,6 +190,7 @@ const PDFGeneratorUploader = ({ isAdmin }: Props) => {
         router.push(`/dashboard/${response.data.fileId}`);
         setSelectedImages([]);
         setPdfName("");
+        setPreviewPdfUrl(null);
       }
     } catch (error) {
       console.error("Error generating or uploading PDF:", error);
@@ -236,6 +282,43 @@ const PDFGeneratorUploader = ({ isAdmin }: Props) => {
     </Card>
   );
 
+  const renderPreview = () => (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button
+          className="w-full mb-4"
+          onClick={handleGeneratePreview}
+          disabled={isGenerating}
+        >
+          {isGenerating ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generando
+              previsualización...
+            </>
+          ) : (
+            <>
+              <Eye className="mr-2 h-4 w-4" /> Previsualizar PDF
+            </>
+          )}
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-4xl max-h-[90vh]">
+        <DialogHeader>
+          <DialogTitle>Previsualización del PDF</DialogTitle>
+        </DialogHeader>
+        <div className="w-full h-[calc(90vh-100px)]">
+          {previewPdfUrl && (
+            <iframe
+              src={previewPdfUrl}
+              className="w-full h-full"
+              title="PDF Preview"
+            />
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+
   return (
     <div className="flex h-screen bg-gray-100">
       <SideBar isAdmin={isAdmin} />
@@ -315,6 +398,8 @@ const PDFGeneratorUploader = ({ isAdmin }: Props) => {
         </Card>
 
         {renderImageList()}
+
+        {selectedImages.length > 0 && renderPreview()}
 
         <div className="mt-6">
           <Button
