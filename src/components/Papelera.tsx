@@ -5,6 +5,17 @@ import { trpc } from "@/app/_trpc/client";
 import { Button } from "./ui/button";
 import SideBar from "./SideBar";
 import { Loader2, RefreshCw, Trash2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 type PropsPapelera = {
   isAdmin: boolean;
@@ -63,30 +74,71 @@ const Papelera = ({ isAdmin }: PropsPapelera) => {
               >
                 <span className="font-medium">{file.name}</span>
                 <div className="space-x-2">
-                  <Button
-                    onClick={() => handleRestore(file.id)}
-                    disabled={restoringId === file.id}
-                    className="bg-blue-500 hover:bg-blue-600"
-                  >
-                    {restoringId === file.id ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <RefreshCw className="h-4 w-4 mr-2" />
-                    )}
-                    Restaurar
-                  </Button>
-                  <Button
-                    onClick={() => handleDelete(file.id)}
-                    disabled={deletingId === file.id}
-                    className="bg-red-500 hover:bg-red-600"
-                  >
-                    {deletingId === file.id ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Trash2 className="h-4 w-4 mr-2" />
-                    )}
-                    Eliminar permanentemente
-                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        className="bg-blue-500 hover:bg-blue-600"
+                        disabled={restoringId === file.id}
+                      >
+                        {restoringId === file.id ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <RefreshCw className="h-4 w-4 mr-2" />
+                        )}
+                        Restaurar
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Esta acción restaurará el archivo {file.name}. ¿Deseas
+                          continuar?
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => handleRestore(file.id)}
+                        >
+                          Restaurar
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        className="bg-red-500 hover:bg-red-600"
+                        disabled={deletingId === file.id}
+                      >
+                        {deletingId === file.id ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Trash2 className="h-4 w-4 mr-2" />
+                        )}
+                        Eliminar permanentemente
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Esta acción eliminará permanentemente el archivo{" "}
+                          {file.name}. Esta acción no se puede deshacer.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => handleDelete(file.id)}
+                        >
+                          Eliminar
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               </div>
             ))}
