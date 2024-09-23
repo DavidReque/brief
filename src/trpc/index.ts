@@ -42,11 +42,12 @@ export const appRouter = router({
     return !!user;
   }),
   getUserFiles: privateProcedure.query(async ({ ctx }) => {
-    const { user, userId } = ctx;
+    const { userId } = ctx;
 
     return await db.file.findMany({
       where: {
         userId,
+        isDeleted: false,
       },
     });
   }),
@@ -115,7 +116,6 @@ export const appRouter = router({
     .mutation(async ({ ctx, input }) => {
       const { userId } = ctx;
 
-      // obtenemos el archivo especifico a eliminar
       const file = await db.file.findFirst({
         where: {
           id: input.id,
@@ -127,10 +127,13 @@ export const appRouter = router({
         throw new TRPCError({ code: "NOT_FOUND" });
       }
 
-      // eliminamos el archivo co su id asignado
-      await db.file.delete({
+      // En lugar de eliminar, actualizamos el campo isDeleted
+      await db.file.update({
         where: {
           id: input.id,
+        },
+        data: {
+          isDeleted: true,
         },
       });
 
@@ -297,7 +300,10 @@ export const appRouter = router({
       }
 
       const areaFiles = await db.file.findMany({
-        where: { areaId },
+        where: {
+          areaId,
+          isDeleted: false,
+        },
         include: {
           user: { select: { id: true, email: true } },
         },
@@ -316,6 +322,68 @@ export const appRouter = router({
           email: file.user.email,
         },
       }));
+    }),
+  // Procedimiento para obtener archivos eliminados
+  getDeletedFiles: privateProcedure.query(async ({ ctx }) => {
+    const { userId } = ctx;
+
+    const deletedFiles = await db.file.findMany({
+      where: {
+        userId,
+        isDeleted: true,
+      },
+    });
+
+    return deletedFiles;
+  }),
+  // Procedimiento para restaurar archivos eliminados
+  restoreFile: privateProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const { userId } = ctx;
+
+      const file = await db.file.findFirst({
+        where: {
+          id: input.id,
+          userId,
+          isDeleted: true,
+        },
+      });
+
+      if (!file) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
+
+      // Restauramos el archivo, cambiando `isDeleted` a false
+      await db.file.update({
+        where: { id: input.id },
+        data: { isDeleted: false },
+      });
+
+      return file;
+    }),
+  // Procedimiento para eliminar permanentemente un archivo
+  permanentlyDeleteFile: privateProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const { userId } = ctx;
+
+      const file = await db.file.findFirst({
+        where: {
+          id: input.id,
+          isDeleted: true,
+        },
+      });
+
+      if (!file) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
+
+      await db.file.delete({
+        where: { id: input.id },
+      });
+
+      return file;
     }),
 });
 

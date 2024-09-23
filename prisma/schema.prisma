@@ -58,6 +58,7 @@ model File {
   userId       String
   area         Area         @relation(fields: [areaId], references: [id])
   areaId       String
+  isDeleted Boolean  @default(false)
 
   @@index([userId])
   @@index([areaId])
