@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { trpc } from "@/app/_trpc/client";
 import { Button } from "./ui/button";
 import SideBar from "./SideBar";
-import { Loader2, RefreshCw, Trash2 } from "lucide-react";
+import { RefreshCw, Trash2 } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,6 +16,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import Skeleton from "react-loading-skeleton";
 
 type PropsPapelera = {
   isAdmin: boolean;
@@ -24,6 +25,7 @@ type PropsPapelera = {
 const Papelera = ({ isAdmin }: PropsPapelera) => {
   const [restoringId, setRestoringId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [isDeletingAll, setIsDeletingAll] = useState(false);
 
   const {
     data: deletedFiles,
@@ -46,6 +48,13 @@ const Papelera = ({ isAdmin }: PropsPapelera) => {
       },
     });
 
+  const { mutate: deleteAllFiles } = trpc.deleteAllFiles.useMutation({
+    onSuccess: () => {
+      refetch();
+      setIsDeletingAll(false);
+    },
+  });
+
   const handleRestore = (id: string) => {
     setRestoringId(id);
     restoreFile({ id });
@@ -56,68 +65,79 @@ const Papelera = ({ isAdmin }: PropsPapelera) => {
     permanentlyDeleteFile({ id });
   };
 
+  const handleDeleteAll = () => {
+    setIsDeletingAll(true);
+    deleteAllFiles();
+  };
+
   return (
     <div className="flex h-screen bg-gray-100">
       <SideBar isAdmin={isAdmin} />
       <div className="flex-1 p-10 mt-4">
-        <h2 className="text-2xl font-bold mb-6">Papelera</h2>
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold">Papelera</h2>
+          {deletedFiles && deletedFiles.length > 0 && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="destructive"
+                  className="bg-red-500 hover:bg-red-600"
+                  disabled={isDeletingAll}
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Eliminar todo
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Esta acción eliminará permanentemente todos los archivos de
+                    la papelera. Esta acción no se puede deshacer.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDeleteAll}>
+                    Eliminar todo
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
+        </div>
         {isLoading ? (
-          <div className="flex justify-center items-center h-64">
-            <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+          <div className="space-y-4">
+            {[...Array(3)].map((_, i) => (
+              <Skeleton key={i} height={200} className="w-full" />
+            ))}
           </div>
         ) : deletedFiles && deletedFiles.length > 0 ? (
-          <div className="bg-white shadow rounded-lg">
+          <div className="space-y-4">
             {deletedFiles.map((file) => (
               <div
                 key={file.id}
-                className="flex items-center justify-between p-4 border-b last:border-b-0"
+                className="flex items-center justify-between p-4 bg-white shadow rounded-lg transition-all hover:shadow-md"
               >
                 <span className="font-medium">{file.name}</span>
                 <div className="space-x-2">
+                  <Button
+                    variant="outline"
+                    className="border-blue-500 text-blue-500 hover:bg-blue-50"
+                    disabled={restoringId === file.id}
+                    onClick={() => handleRestore(file.id)}
+                  >
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Restaurar
+                  </Button>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <Button
-                        className="bg-blue-500 hover:bg-blue-600"
-                        disabled={restoringId === file.id}
-                      >
-                        {restoringId === file.id ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <RefreshCw className="h-4 w-4 mr-2" />
-                        )}
-                        Restaurar
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Esta acción restaurará el archivo {file.name}. ¿Deseas
-                          continuar?
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={() => handleRestore(file.id)}
-                        >
-                          Restaurar
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button
+                        variant="destructive"
                         className="bg-red-500 hover:bg-red-600"
                         disabled={deletingId === file.id}
                       >
-                        {deletingId === file.id ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <Trash2 className="h-4 w-4 mr-2" />
-                        )}
+                        <Trash2 className="h-4 w-4 mr-2" />
                         Eliminar permanentemente
                       </Button>
                     </AlertDialogTrigger>
@@ -144,7 +164,7 @@ const Papelera = ({ isAdmin }: PropsPapelera) => {
             ))}
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center h-64">
+          <div className="flex flex-col items-center justify-center h-64 bg-white shadow rounded-lg">
             <Trash2 className="h-16 w-16 text-gray-400 mb-4" />
             <p className="text-xl font-medium text-gray-600">
               La papelera está vacía

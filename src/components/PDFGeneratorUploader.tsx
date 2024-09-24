@@ -15,6 +15,9 @@ import {
   ChevronDown,
   ImageIcon,
   Eye,
+  Settings,
+  ImagesIcon,
+  FileUp,
 } from "lucide-react";
 import { Button } from "./ui/button";
 import {
@@ -42,6 +45,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "./ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 
 type Props = {
   isAdmin: boolean;
@@ -325,120 +329,148 @@ const PDFGeneratorUploader = ({ isAdmin }: Props) => {
       <div className="flex-1 p-8 overflow-y-auto">
         <h1 className="text-3xl font-bold mb-6">Generador de PDF</h1>
 
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle>Configuración del PDF</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <label
-                htmlFor="pdfName"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Nombre del PDF
-              </label>
-              <Input
-                id="pdfName"
-                type="text"
-                placeholder="Ingrese el nombre del PDF"
-                value={pdfName}
-                onChange={(e) => setPdfName(e.target.value)}
-              />
-            </div>
+        <Tabs defaultValue="config" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="config">
+              <Settings className="mr-2 h-4 w-4" />
+              Configuración
+            </TabsTrigger>
+            <TabsTrigger value="images">
+              <ImagesIcon className="mr-2 h-4 w-4" />
+              Imágenes
+            </TabsTrigger>
+            <TabsTrigger value="generate">
+              <FileUp className="mr-2 h-4 w-4" />
+              Generar y Subir
+            </TabsTrigger>
+          </TabsList>
 
-            <div>
-              <label
-                htmlFor="area"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Área
-              </label>
-              <Select onValueChange={(value) => setSelectedArea(value)}>
-                <SelectTrigger id="area" className="w-full">
-                  <SelectValue placeholder="Selecciona un área" />
-                </SelectTrigger>
-                <SelectContent>
-                  {areas?.map((area) => (
-                    <SelectItem key={area.id} value={area.id}>
-                      {area.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle>Subir imágenes</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Dropzone
-              onDrop={handleImageDrop}
-              accept={{ "image/*": [".jpeg", ".png", ".jpg"] }}
-            >
-              {({ getRootProps, getInputProps }) => (
-                <div
-                  {...getRootProps()}
-                  className="border-dashed border-2 border-gray-300 p-6 text-center cursor-pointer rounded-md hover:bg-gray-50 transition-colors"
-                >
-                  <input {...getInputProps()} />
-                  <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                  <p className="mt-2 text-sm text-gray-600">
-                    Arrastra imágenes aquí o haz clic para seleccionarlas.
-                  </p>
-                  <p className="mt-1 text-xs text-gray-500">
-                    Solo imágenes (.jpeg, .jpg, .png)
-                  </p>
+          <TabsContent value="config">
+            <Card>
+              <CardHeader>
+                <CardTitle>Configuración del PDF</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <label
+                    htmlFor="pdfName"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Nombre del PDF
+                  </label>
+                  <Input
+                    id="pdfName"
+                    type="text"
+                    placeholder="Ingrese el nombre del PDF"
+                    value={pdfName}
+                    onChange={(e) => setPdfName(e.target.value)}
+                  />
                 </div>
-              )}
-            </Dropzone>
-          </CardContent>
-        </Card>
 
-        {renderImageList()}
+                <div>
+                  <label
+                    htmlFor="area"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Área
+                  </label>
+                  <Select onValueChange={(value) => setSelectedArea(value)}>
+                    <SelectTrigger id="area" className="w-full">
+                      <SelectValue placeholder="Selecciona un área" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {areas?.map((area) => (
+                        <SelectItem key={area.id} value={area.id}>
+                          {area.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-        {selectedImages.length > 0 && renderPreview()}
+          <TabsContent value="images">
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle>Subir imágenes</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Dropzone
+                  onDrop={handleImageDrop}
+                  accept={{ "image/*": [".jpeg", ".png", ".jpg"] }}
+                >
+                  {({ getRootProps, getInputProps }) => (
+                    <div
+                      {...getRootProps()}
+                      className="border-dashed border-2 border-gray-300 p-6 text-center cursor-pointer rounded-md hover:bg-gray-50 transition-colors"
+                    >
+                      <input {...getInputProps()} />
+                      <Upload className="mx-auto h-12 w-12 text-gray-400" />
+                      <p className="mt-2 text-sm text-gray-600">
+                        Arrastra imágenes aquí o haz clic para seleccionarlas.
+                      </p>
+                      <p className="mt-1 text-xs text-gray-500">
+                        Solo imágenes (.jpeg, .jpg, .png)
+                      </p>
+                    </div>
+                  )}
+                </Dropzone>
+              </CardContent>
+            </Card>
 
-        <div className="mt-6">
-          <Button
-            onClick={handleGenerateAndUpload}
-            className="w-full"
-            disabled={
-              isGenerating ||
-              isUploading ||
-              !selectedArea ||
-              selectedImages.length === 0 ||
-              !pdfName.trim()
-            }
-          >
-            {isGenerating ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generando
-                PDF...
-              </>
-            ) : isUploading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Subiendo
-                PDF...
-              </>
-            ) : (
-              <>
-                <Cloud className="mr-2 h-4 w-4" /> Generar y Subir PDF
-              </>
-            )}
-          </Button>
-        </div>
+            {renderImageList()}
+          </TabsContent>
 
-        {isUploading && (
-          <div className="mt-4">
-            <Progress value={progress} className="w-full" />
-            <p className="text-center text-sm text-gray-600 mt-2">
-              Subiendo: {progress}%
-            </p>
-          </div>
-        )}
+          <TabsContent value="generate">
+            <Card>
+              <CardHeader>
+                <CardTitle>Generar y Subir PDF</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {selectedImages.length > 0 && renderPreview()}
+
+                <Button
+                  onClick={handleGenerateAndUpload}
+                  className="w-full"
+                  disabled={
+                    isGenerating ||
+                    isUploading ||
+                    !selectedArea ||
+                    selectedImages.length === 0 ||
+                    !pdfName.trim()
+                  }
+                >
+                  {isGenerating ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />{" "}
+                      Generando PDF...
+                    </>
+                  ) : isUploading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Subiendo
+                      PDF...
+                    </>
+                  ) : (
+                    <>
+                      <Cloud className="mr-2 h-4 w-4" /> Generar y Subir PDF
+                    </>
+                  )}
+                </Button>
+
+                {isUploading && (
+                  <div className="mt-4">
+                    <Progress value={progress} className="w-full" />
+                    <p className="text-center text-sm text-gray-600 mt-2">
+                      Subiendo: {progress}%
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

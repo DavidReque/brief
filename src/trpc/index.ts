@@ -385,6 +385,16 @@ export const appRouter = router({
 
       return file;
     }),
+  deleteAllFiles: privateProcedure.mutation(async ({ ctx }) => {
+    const { userId } = ctx;
+
+    await db.file.deleteMany({
+      where: {
+        userId,
+        isDeleted: true,
+      },
+    });
+  }),
 });
 
 export type AppRouter = typeof appRouter;
