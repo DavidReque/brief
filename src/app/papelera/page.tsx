@@ -25,7 +25,7 @@ const Page = async () => {
     },
   });
 
-  if (!dbUser) redirect("/");
+  if (!dbUser) redirect("/auth-callback?origin=papelera");
 
   return <Papelera isAdmin={isAdmin} />;
 };

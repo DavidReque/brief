@@ -24,7 +24,7 @@ const Page = async () => {
     },
   });
 
-  if (!dbUser) redirect("/");
+  if (!dbUser) redirect("/auth-callback?origin=dashboard");
 
   return <Dashboard isAdmin={isAdmin} />;
 };
