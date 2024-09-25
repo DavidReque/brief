@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "preinstall": "export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig"
   },
   "dependencies": {
     "@kinde-oss/kinde-auth-nextjs": "^2.3.6",
@@ -64,5 +65,8 @@
     "postcss": "^8",
     "tailwindcss": "^3.4.7",
     "typescript": "^5"
+  },
+  "optionalDependencies": {
+    "canvas": "2.11.2"
   }
 }
