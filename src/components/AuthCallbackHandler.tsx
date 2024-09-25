@@ -1,4 +1,3 @@
-// components/AuthCallbackHandler.tsx
 "use client";
 
 import { trpc } from "@/app/_trpc/client";
