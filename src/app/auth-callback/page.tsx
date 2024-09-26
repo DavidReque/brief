@@ -1,11 +1,16 @@
-import AuthCallbackHandler from "@/components/AuthCallbackHandler";
+import dynamic from "next/dynamic";
 import LoadingScreen from "@/components/LoadingScreen";
+
+const AuthCallbackHandler = dynamic(
+  () => import("@/components/AuthCallbackHandler"),
+  { ssr: false }
+);
 
 const Page = () => {
   return (
     <>
-      <AuthCallbackHandler />
       <LoadingScreen />
+      <AuthCallbackHandler />
     </>
   );
 };
