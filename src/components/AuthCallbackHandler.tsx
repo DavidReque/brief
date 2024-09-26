@@ -16,17 +16,22 @@ const AuthCallbackHandler = () => {
 
   useEffect(() => {
     if (data?.success) {
-      // Redirigir cuando el usuario se sincroniza con la base de datos
-      router.push(origin ? `/${origin}` : "/dashboard");
+      // Usar window.location.origin para obtener la URL base correcta
+      const baseUrl = window.location.origin;
+      const redirectUrl = origin
+        ? `${baseUrl}/${origin}`
+        : `${baseUrl}/dashboard`;
+      window.location.href = redirectUrl;
     }
-  }, [data, router, origin]);
+  }, [data, origin]);
 
   useEffect(() => {
     if (error?.data?.code === "UNAUTHORIZED") {
-      // Redirigir si hay error de autenticación
-      router.push("/sign-in");
+      // Usar window.location.origin para obtener la URL base correcta
+      const baseUrl = window.location.origin;
+      window.location.href = `${baseUrl}/sign-in`;
     }
-  }, [error, router]);
+  }, [error]);
 
   return null;
 };
