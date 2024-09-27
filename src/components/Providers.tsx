@@ -11,7 +11,7 @@ const Providers = ({ children }: PropsWithChildren) => {
     trpc.createClient({
       links: [
         httpBatchLink({
-          url: "https://gestion-phi.vercel.app//api/trpc",
+          url: "/api/trpc",
         }),
       ],
     })
