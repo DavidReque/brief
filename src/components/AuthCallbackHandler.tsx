@@ -24,7 +24,7 @@ const AuthCallbackHandler = () => {
   useEffect(() => {
     if (error?.data?.code === "UNAUTHORIZED") {
       // Redirigir si hay error de autenticación
-      router.push("/sign-in");
+      router.push("/");
     }
   }, [error, router]);
 
