@@ -4,7 +4,7 @@ import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { redirect } from "next/navigation";
 
 const Page = async () => {
-  // TODO: EDITAR INTEGRANTES DE UN USUARIO
+  // TODO: no mostrar usuario admin para eliminar al editar area
   const { getUser } = getKindeServerSession();
   const user = await getUser();
 

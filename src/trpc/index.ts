@@ -54,10 +54,23 @@ export const appRouter = router({
   getUserAreas: privateProcedure.query(async ({ ctx }) => {
     const { userId } = ctx;
 
-    const userAreas = await db.userArea.findMany({
-      where: { userId },
+    const userAreas = await db.area.findMany({
+      where: {
+        users: {
+          some: { userId },
+        },
+      },
       include: {
-        area: true, // Incluye la información del área asociada
+        users: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                email: true,
+              },
+            },
+          },
+        },
       },
     });
 
@@ -68,10 +81,14 @@ export const appRouter = router({
       });
     }
 
-    return userAreas.map(({ area }) => ({
+    return userAreas.map((area) => ({
       id: area.id,
       name: area.name,
       description: area.description,
+      users: area.users.map((ua) => ({
+        id: ua.user.id,
+        email: ua.user.email,
+      })),
     }));
   }),
   getFile: privateProcedure
@@ -395,6 +412,75 @@ export const appRouter = router({
       },
     });
   }),
+  editArea: privateProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        name: z.string(),
+        description: z.string().optional(),
+        userIds: z.array(z.string()),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { userId } = ctx;
+
+      const isAdmin = await db.userArea.findFirst({
+        where: { userId, areaId: input.id, role: "ADMIN" },
+      });
+
+      if (!isAdmin) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "No tienes permiso para editar esta área",
+        });
+      }
+
+      // Actualizar el área
+      const updatedArea = await db.area.update({
+        where: { id: input.id },
+        data: {
+          name: input.name,
+          description: input.description,
+        },
+      });
+
+      // Obtener los usuarios actuales del área
+      const currentUsers = await db.userArea.findMany({
+        where: { areaId: input.id },
+        select: { userId: true },
+      });
+
+      const currentUserIds = currentUsers.map((u) => u.userId);
+
+      // Usuarios a agregar
+      const usersToAdd = input.userIds.filter(
+        (id) => !currentUserIds.includes(id)
+      );
+
+      // Usuarios a eliminar
+      const usersToRemove = currentUserIds.filter(
+        (id) => !input.userIds.includes(id)
+      );
+
+      // Agregar nuevos usuarios
+      await db.userArea.createMany({
+        data: usersToAdd.map((userId) => ({
+          userId,
+          areaId: input.id,
+          role: UserRole.MEMBER,
+        })),
+      });
+
+      // Eliminar usuarios que ya no están en la lista
+      await db.userArea.deleteMany({
+        where: {
+          areaId: input.id,
+          userId: { in: usersToRemove },
+        },
+      });
+
+      return updatedArea;
+    }),
 });
 
 export type AppRouter = typeof appRouter;

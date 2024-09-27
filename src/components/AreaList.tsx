@@ -3,7 +3,7 @@
 import { trpc } from "@/app/_trpc/client";
 import React, { useState } from "react";
 import Link from "next/link";
-import { Loader2, Trash, FolderOpen, Plus } from "lucide-react";
+import { Loader2, Trash, FolderOpen, Plus, Edit } from "lucide-react";
 import { Button } from "./ui/button";
 import SideBar from "./SideBar";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
@@ -19,11 +19,13 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "./ui/alert-dialog";
+import EditAreaModal from "./EditAreaModal";
 
 type Area = {
   id: string;
   name: string;
   description: string | null;
+  users: { id: string; email: string }[];
 };
 
 type AreaListProps = {
@@ -35,6 +37,7 @@ const AreaList = ({ isAdmin }: AreaListProps) => {
     string | null
   >(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [editingArea, setEditingArea] = useState<Area | null>(null);
   const { data: areas, error, refetch } = trpc.getUserAreas.useQuery();
   const deleteAreaMutation = trpc.deleteArea.useMutation();
 
@@ -48,6 +51,10 @@ const AreaList = ({ isAdmin }: AreaListProps) => {
     } finally {
       setCurrentlyDeletingArea(null);
     }
+  };
+
+  const handleEditArea = (area: Area) => {
+    setEditingArea(area);
   };
 
   const filteredAreas = areas?.filter(
@@ -109,37 +116,46 @@ const AreaList = ({ isAdmin }: AreaListProps) => {
                         </Button>
                       </Link>
                       {isAdmin && (
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button variant="destructive" size="sm">
-                              <Trash className="h-4 w-4" />
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>
-                                ¿Estás seguro?
-                              </AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Esta acción no se puede deshacer. Esto eliminará
-                                permanentemente el área y todos sus datos
-                                asociados.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => handleDeleteArea(area.id)}
-                              >
-                                {currentlyDeletingArea === area.id ? (
-                                  <Loader2 className="h-4 w-4 animate-spin" />
-                                ) : (
-                                  "Eliminar"
-                                )}
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
+                        <div className="flex space-x-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEditArea(area)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="destructive" size="sm">
+                                <Trash className="h-4 w-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>
+                                  ¿Estás seguro?
+                                </AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Esta acción no se puede deshacer. Esto
+                                  eliminará permanentemente el área y todos sus
+                                  datos asociados.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => handleDeleteArea(area.id)}
+                                >
+                                  {currentlyDeletingArea === area.id ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                  ) : (
+                                    "Eliminar"
+                                  )}
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
                       )}
                     </div>
                   </CardContent>
@@ -149,6 +165,14 @@ const AreaList = ({ isAdmin }: AreaListProps) => {
           </div>
         </main>
       </div>
+      {editingArea && (
+        <EditAreaModal
+          isOpen={!!editingArea}
+          onClose={() => setEditingArea(null)}
+          area={editingArea}
+          onEdit={() => refetch()}
+        />
+      )}
     </div>
   );
 };
