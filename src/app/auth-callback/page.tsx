@@ -1,5 +1,4 @@
 import dynamic from "next/dynamic";
-import LoadingScreen from "@/components/LoadingScreen";
 
 const AuthCallbackHandler = dynamic(
   () => import("@/components/AuthCallbackHandler"),
@@ -9,7 +8,6 @@ const AuthCallbackHandler = dynamic(
 const Page = () => {
   return (
     <>
-      <LoadingScreen />
       <AuthCallbackHandler />
     </>
   );
