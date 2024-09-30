@@ -1,3 +1,4 @@
+import { db } from "@/db";
 import { type ClassValue, clsx } from "clsx";
 import { Metadata } from "next";
 import { twMerge } from "tailwind-merge";
@@ -54,4 +55,21 @@ export function constructMetadata({
       },
     }),
   };
+}
+
+export async function verifyOrCreateUser(userId: string, email: string) {
+  try {
+    const user = await db.user.upsert({
+      where: { id: userId },
+      update: {},
+      create: {
+        id: userId,
+        email: email,
+      },
+    });
+    return user;
+  } catch (error) {
+    console.error("Error verifying or creating user:", error);
+    throw error;
+  }
 }

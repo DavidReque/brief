@@ -1,5 +1,6 @@
 import CreateForm from "@/components/CreateForm";
 import { db } from "@/db";
+import { verifyOrCreateUser } from "@/lib/utils";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { redirect } from "next/navigation";
 
@@ -10,13 +11,11 @@ const Page = async () => {
 
   if (!user || !user.id) redirect("/");
 
-  const dbUser = await db.user.findFirst({
-    where: {
-      id: user.id,
-    },
-  });
-
-  if (!dbUser) redirect("/auth-callback?origin=create");
+  try {
+    await verifyOrCreateUser(user.id, user.email!);
+  } catch (error) {
+    console.error("Error verifying or creating user:", error);
+  }
 
   const isAdmin = !!(await db.userArea.findFirst({
     where: {
