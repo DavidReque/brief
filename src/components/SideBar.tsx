@@ -193,7 +193,7 @@ const SideBar: React.FC<DashboardProps> = ({ isAdmin }) => {
   return (
     <>
       <div
-        className={`md:hidden fixed top-0 left-0 right-0 h-[75px] z-40 flex items-center px-4`}
+        className={`md:hidden fixed top-0 left-0 right-0 h-[7]150px] z-40 flex items-center px-4`}
       >
         <Button
           variant="ghost"

@@ -1,15 +1,13 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
-import { Button } from "./ui/button";
-import Dropzone from "react-dropzone";
-import { Cloud, File, Loader2 } from "lucide-react";
+import React, { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Progress } from "./ui/progress";
 import { useToast } from "./ui/use-toast";
 import { trpc } from "@/app/_trpc/client";
 import axios from "axios";
+import { Progress } from "./ui/progress";
+import { Cloud, File, Loader2, Upload } from "lucide-react";
+import { Button } from "./ui/button";
 import {
   Select,
   SelectContent,
@@ -17,10 +15,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
+import Dropzone from "react-dropzone";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
 
-const UploadDropzone = () => {
+const UploadDropzone = ({ onClose }: { onClose: () => void }) => {
   const router = useRouter();
-
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const [selectedArea, setSelectedArea] = useState<string>("");
@@ -35,9 +35,7 @@ const UploadDropzone = () => {
     }
   }, []);
 
-  const handleUpload = async (e: React.MouseEvent) => {
-    e.preventDefault();
-
+  const handleUpload = async () => {
     if (!selectedArea) {
       toast({
         title: "Área no seleccionada",
@@ -78,7 +76,7 @@ const UploadDropzone = () => {
           title: "Éxito",
           description: "Archivo cargado correctamente.",
         });
-        // redirigir al usuario
+        onClose();
         router.push(`/dashboard/${response.data.fileId}`);
       }
     } catch (error) {
@@ -94,60 +92,36 @@ const UploadDropzone = () => {
   };
 
   return (
-    <div className="flex flex-col space-y-4 p-4">
-      <div className="border h-48 border-dashed border-gray-300 rounded-lg overflow-hidden">
-        <Dropzone multiple={false} onDrop={handleFileDrop}>
+    <Card>
+      <CardHeader>
+        <CardTitle>Cargar archivo</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <Dropzone onDrop={handleFileDrop} multiple={false}>
           {({ getRootProps, getInputProps }) => (
-            <div {...getRootProps()} className="h-full">
-              <div className="flex items-center justify-center w-full h-full">
-                <label
-                  htmlFor="dropzone-file"
-                  className="flex flex-col items-center justify-center w-full h-full rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100"
-                >
-                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                    <Cloud className="h-6 w-6 text-zinc-500 mb-2" />
-                    <p className="mb-2 text-sm text-zinc-700">
-                      <span className="font-semibold">
-                        Click para seleccionar
-                      </span>{" "}
-                      o arrastrar
-                    </p>
-                  </div>
-
-                  {acceptedFile && (
-                    <div className="max-w-xs bg-white flex items-center rounded-md overflow-hidden outline outline-[1px] outline-zinc-200 divide-x divide-zinc-200">
-                      <div className="px-3 py-2 h-full grid place-items-center">
-                        <File className="h-4 w-4 text-blue-500" />
-                      </div>
-                      <div className="px-3 py-2 h-full text-sm truncate">
-                        {acceptedFile.name}
-                      </div>
-                    </div>
-                  )}
-
-                  <input
-                    {...getInputProps()}
-                    type="file"
-                    id="dropzone-file"
-                    className="hidden"
-                  />
-                </label>
-              </div>
+            <div
+              {...getRootProps()}
+              className="border-dashed border-2 border-gray-300 p-6 text-center cursor-pointer rounded-md hover:bg-gray-50 transition-colors"
+            >
+              <input {...getInputProps()} />
+              <Upload className="mx-auto h-12 w-12 text-gray-400" />
+              <p className="mt-2 text-sm text-gray-600">
+                Arrastra un archivo aquí o haz clic para seleccionarlo.
+              </p>
+              {acceptedFile && (
+                <div className="mt-2 text-sm text-gray-600">
+                  Archivo seleccionado: {acceptedFile.name}
+                </div>
+              )}
             </div>
           )}
         </Dropzone>
-      </div>
 
-      <div className="w-full">
-        <Select
-          value={selectedArea}
-          onValueChange={(value) => setSelectedArea(value)}
-        >
-          <SelectTrigger className="w-full bg-white border border-gray-300 rounded-md">
+        <Select onValueChange={(value) => setSelectedArea(value)}>
+          <SelectTrigger className="w-full">
             <SelectValue placeholder="Seleccionar área" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="Seleccionar área">Seleccionar área</SelectItem>
             {areas?.map((area) => (
               <SelectItem key={area.id} value={area.id}>
                 {area.name}
@@ -155,34 +129,36 @@ const UploadDropzone = () => {
             ))}
           </SelectContent>
         </Select>
-      </div>
 
-      {acceptedFile && selectedArea && (
         <Button
           onClick={handleUpload}
           className="w-full"
-          disabled={isUploading}
+          disabled={isUploading || !acceptedFile || !selectedArea}
         >
-          {isUploading ? "Cargando..." : "Iniciar carga"}
-        </Button>
-      )}
-
-      {isUploading && (
-        <div className="w-full">
-          <Progress
-            indicatorColor={uploadProgress === 100 ? "bg-green-500" : ""}
-            value={uploadProgress}
-            className="h-1 w-full bg-zinc-200"
-          />
-          {uploadProgress === 100 && (
-            <div className="flex gap-1 items-center justify-center text-sm text-zinc-700 text-center pt-2">
-              <Loader2 className="h-3 w-3 animate-spin" />
-              Redirigiendo...
-            </div>
+          {isUploading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Cargando...
+            </>
+          ) : (
+            <>
+              <Cloud className="mr-2 h-4 w-4" /> Iniciar carga
+            </>
           )}
-        </div>
-      )}
-    </div>
+        </Button>
+
+        {isUploading && (
+          <div className="w-full">
+            <Progress
+              value={uploadProgress}
+              className="h-1 w-full bg-zinc-200"
+            />
+            <p className="text-center text-sm text-gray-600 mt-2">
+              Cargando: {uploadProgress}%
+            </p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 
@@ -196,7 +172,7 @@ export default function UploadButton() {
       </DialogTrigger>
 
       <DialogContent className="sm:max-w-md">
-        <UploadDropzone />
+        <UploadDropzone onClose={() => setIsOpen(false)} />
       </DialogContent>
     </Dialog>
   );
