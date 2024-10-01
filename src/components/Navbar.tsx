@@ -7,7 +7,7 @@ import {
   LoginLink,
   RegisterLink,
 } from "@kinde-oss/kinde-auth-nextjs/server";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Menu } from "lucide-react";
 
 const Navbar = async () => {
   // Obtén la sesión del servidor para verificar si el usuario está autenticado
@@ -15,14 +15,15 @@ const Navbar = async () => {
   const user = await getUser();
 
   return (
-    <nav className="sticky h-14 inset-x-0 top-0 z-30 w-full border-b border-gray-200 bg-white/75 backdrop-blur-lg transition-all">
+    <nav className="sticky top-0 z-30 w-full h-14 bg-white/75 backdrop-blur-lg border-b border-gray-200 transition-all">
       <MaxWithWrapper>
-        <div className="flex h-14 items-center justify-between border-b border-zinc-200">
+        <div className="flex h-14 items-center justify-between">
           <Link href="/" className="flex z-40 font-semibold">
-            <span>Logo.</span>
+            <span>Logo</span>
           </Link>
 
-          <div className="hidden items-center space-x-4 sm:flex">
+          {/* Menú para pantallas grandes */}
+          <div className="hidden sm:flex items-center space-x-4">
             {user ? (
               <Link
                 href="/dashboard"
@@ -34,7 +35,40 @@ const Navbar = async () => {
                 Dashboard
               </Link>
             ) : (
-              // Si no está autenticado, mostrar los botones de Login y Register
+              <>
+                <LoginLink
+                  className={buttonVariants({
+                    variant: "ghost",
+                    size: "sm",
+                  })}
+                >
+                  Iniciar sesión
+                </LoginLink>
+                <RegisterLink
+                  className={buttonVariants({
+                    size: "sm",
+                  })}
+                >
+                  Registrarse
+                  <ArrowRight className="ml-1.5 h-5 w-5" />
+                </RegisterLink>
+              </>
+            )}
+          </div>
+
+          {/* Menú para pantallas pequeñas */}
+          <div className="block sm:hidden">
+            {user ? (
+              <Link
+                href="/dashboard"
+                className={buttonVariants({
+                  variant: "ghost",
+                  size: "sm",
+                })}
+              >
+                Dashboard
+              </Link>
+            ) : (
               <>
                 <LoginLink
                   className={buttonVariants({

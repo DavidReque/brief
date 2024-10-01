@@ -119,8 +119,8 @@ const Papelera = ({ isAdmin }: PropsPapelera) => {
                 key={file.id}
                 className="flex items-center justify-between p-4 bg-white shadow rounded-lg transition-all hover:shadow-md"
               >
-                <span className="font-medium">{file.name}</span>
-                <div className="space-x-2">
+                <span className="font-medium mb-2 sm:mb-0">{file.name}</span>
+                <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
                   <Button
                     variant="outline"
                     className="border-blue-500 text-blue-500 hover:bg-blue-50"

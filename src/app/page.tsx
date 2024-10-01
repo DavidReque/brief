@@ -6,6 +6,8 @@ import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { ArrowBigRight } from "lucide-react";
 import Link from "next/link";
 
+// TODO: Mejorar para dispositivos moviles
+
 export default async function Home() {
   const { getUser } = getKindeServerSession();
   const user = await getUser();
