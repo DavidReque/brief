@@ -1,7 +1,8 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, X } from "lucide-react";
 import { useToast } from "./ui/use-toast";
+import ImageZoom from "./ImageZoom";
 
 interface FileRendererProps {
   url: string;
@@ -12,6 +13,7 @@ const FileRenderer: React.FC<FileRendererProps> = ({ url, fileType }) => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [showZoom, setShowZoom] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -75,7 +77,8 @@ const FileRenderer: React.FC<FileRendererProps> = ({ url, fileType }) => {
               src={url}
               alt="Uploaded file"
               onLoad={handleLoad}
-              className="max-w-full max-h-full object-contain"
+              onClick={() => setShowZoom(true)}
+              className="max-w-full max-h-full object-contain cursor-pointer"
               style={{ visibility: loading ? "hidden" : "visible" }}
             />
           </div>
@@ -102,6 +105,7 @@ const FileRenderer: React.FC<FileRendererProps> = ({ url, fileType }) => {
           </div>
         )}
       </div>
+      {showZoom && <ImageZoom src={url} onClose={() => setShowZoom(false)} />}
     </div>
   );
 };

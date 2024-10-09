@@ -41,6 +41,7 @@ const EditAreaModal: React.FC<EditAreaModalProps> = ({
   const { toast } = useToast();
 
   const { data: allUsers } = trpc.getAllUsers.useQuery();
+  const { data: currentUser } = trpc.getCurrentUser.useQuery();
   const editArea = trpc.editArea.useMutation({
     onSuccess: () => {
       toast({
@@ -58,6 +59,9 @@ const EditAreaModal: React.FC<EditAreaModalProps> = ({
       });
     },
   });
+
+  const filteredUsers =
+    allUsers?.filter((user) => user.id !== currentUser?.id) || [];
 
   useEffect(() => {
     setName(area.name);
@@ -107,7 +111,7 @@ const EditAreaModal: React.FC<EditAreaModalProps> = ({
                 <SelectValue placeholder="Seleccionar usuario" />
               </SelectTrigger>
               <SelectContent>
-                {allUsers?.map((user) => (
+                {filteredUsers?.map((user) => (
                   <SelectItem key={user.id} value={user.id}>
                     {user.email}
                   </SelectItem>
@@ -120,22 +124,33 @@ const EditAreaModal: React.FC<EditAreaModalProps> = ({
               Usuarios seleccionados:
             </h3>
             <div className="flex flex-wrap gap-2">
-              {selectedUsers.map((userId) => (
+              {selectedUsers
+                .filter((userId) => userId !== currentUser?.id)
+                .map((userId) => (
+                  <Badge
+                    key={userId}
+                    variant="secondary"
+                    className="flex items-center gap-1"
+                  >
+                    {allUsers?.find((u) => u.id === userId)?.email}
+                    <button
+                      type="button"
+                      onClick={() => handleUserSelect(userId)}
+                      className="text-xs hover:text-red-500 transition-colors"
+                    >
+                      <X size={14} />
+                    </button>
+                  </Badge>
+                ))}
+              {currentUser && selectedUsers.includes(currentUser.id) && (
                 <Badge
-                  key={userId}
+                  key={currentUser.id}
                   variant="secondary"
                   className="flex items-center gap-1"
                 >
-                  {allUsers?.find((u) => u.id === userId)?.email}
-                  <button
-                    type="button"
-                    onClick={() => handleUserSelect(userId)}
-                    className="text-xs hover:text-red-500 transition-colors"
-                  >
-                    <X size={14} />
-                  </button>
+                  {currentUser.email}
                 </Badge>
-              ))}
+              )}
             </div>
           </div>
           <Button type="submit">Guardar cambios</Button>
