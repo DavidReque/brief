@@ -1,8 +1,9 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { Loader2, X } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useToast } from "./ui/use-toast";
-import ImageZoom from "./ImageZoom";
+import Zoom from "react-medium-image-zoom";
+import "react-medium-image-zoom/dist/styles.css";
 
 interface FileRendererProps {
   url: string;
@@ -13,7 +14,6 @@ const FileRenderer: React.FC<FileRendererProps> = ({ url, fileType }) => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const [showZoom, setShowZoom] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -64,8 +64,8 @@ const FileRenderer: React.FC<FileRendererProps> = ({ url, fileType }) => {
   };
 
   return (
-    <div className="w-full h-[calc(100vh-3.5rem)]  shadow flex flex-col items-center justify-center p-4">
-      <div className="w-full h-full max-w-4xl max-h-[80vh]  shadow-lg overflow-hidden relative">
+    <div className="w-full h-[calc(100vh-3.5rem)] shadow flex flex-col items-center justify-center p-4">
+      <div className="w-full h-full max-w-4xl max-h-[80vh] shadow-lg overflow-hidden relative">
         {loading && !error && (
           <div className="absolute inset-0 flex justify-center items-center bg-white bg-opacity-80 z-10">
             <Loader2 className="h-12 w-12 animate-spin text-blue-500" />
@@ -73,14 +73,15 @@ const FileRenderer: React.FC<FileRendererProps> = ({ url, fileType }) => {
         )}
         {!error && fileType === "IMAGE" ? (
           <div className="w-full h-full flex items-center justify-center">
-            <img
-              src={url}
-              alt="Uploaded file"
-              onLoad={handleLoad}
-              onClick={() => setShowZoom(true)}
-              className="max-w-full max-h-full object-contain cursor-pointer"
-              style={{ visibility: loading ? "hidden" : "visible" }}
-            />
+            <Zoom>
+              <img
+                src={url}
+                alt="Uploaded file"
+                onLoad={handleLoad}
+                className="max-w-full max-h-full object-contain cursor-pointer"
+                style={{ visibility: loading ? "hidden" : "visible" }}
+              />
+            </Zoom>
           </div>
         ) : (
           !error && (
@@ -105,7 +106,6 @@ const FileRenderer: React.FC<FileRendererProps> = ({ url, fileType }) => {
           </div>
         )}
       </div>
-      {showZoom && <ImageZoom src={url} onClose={() => setShowZoom(false)} />}
     </div>
   );
 };

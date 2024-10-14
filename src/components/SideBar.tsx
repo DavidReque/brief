@@ -73,6 +73,14 @@ const SideBar: React.FC<DashboardProps> = ({ isAdmin }) => {
 
   const toggleSidebar = () => setIsOpen(!isOpen);
 
+  const truncateEmail = (email: string | null): string => {
+    if (!email) return "No email provided";
+    if (email.length > 20) {
+      return `${email.substring(0, 20)}...`;
+    }
+    return email;
+  };
+
   const NavItemComponent: React.FC<{ item: NavItem; onClick: () => void }> = ({
     item,
     onClick,
@@ -172,13 +180,22 @@ const SideBar: React.FC<DashboardProps> = ({ isAdmin }) => {
           </div>
         ) : userData ? (
           <div className="flex items-center mb-4">
-            <div className="w-10 h-10 rounded-full flex items-center justify-center mr-3">
-              <User2 className="w-6 h-6" />
+            <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center mr-3">
+              <User2 className="w-6 h-6 text-gray-600" />
             </div>
-            <div>
-              <p className="text-sm font-medium text-gray-900">
-                {userData.email}
-              </p>
+            <div className="flex-1 min-w-0">
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <p className="text-sm font-medium text-gray-900 truncate">
+                      {truncateEmail(userData.email)}
+                    </p>
+                  </TooltipTrigger>
+                  <TooltipContent side="top">
+                    <p>{userData.email}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
           </div>
         ) : null}
