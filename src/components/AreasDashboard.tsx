@@ -7,6 +7,7 @@ import {
   Download,
   Ghost,
   Loader2,
+  Save,
   Search,
   Trash,
 } from "lucide-react";
@@ -14,7 +15,7 @@ import Skeleton from "react-loading-skeleton";
 import Link from "next/link";
 import { format } from "date-fns";
 import { Button } from "./ui/button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import SideBar from "./SideBar";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { Calendar } from "./ui/calendar";
@@ -33,6 +34,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "./ui/tooltip";
+import { toast } from "./ui/use-toast";
 
 interface AreaDashboardProps {
   areaId: string;
@@ -63,9 +65,27 @@ const AreasDashboard = ({
     string | null
   >(null);
 
+  const [isSaving, setIsSaving] = useState(false);
+  const [savedFileIds, setSavedFileIds] = useState<string[]>([]);
+
   const utils = trpc.useUtils();
 
   const { data: files, isLoading } = trpc.getAreaFiles.useQuery({ areaId });
+
+  const { data: savedFiles, isLoading: isSavedFilesLoading } =
+    trpc.getSavedFiles.useQuery();
+
+  const { mutate: saveFile } = trpc.addSavedFile.useMutation({
+    onSuccess: (data) => {
+      toast({
+        title: "Archivo guardado",
+        description: "El archivo se ha guardado con éxito.",
+      });
+      setSavedFileIds((prev) => [...prev, data.fileId]);
+      utils.getAreaFiles.invalidate({ areaId });
+      utils.getSavedFiles.invalidate();
+    },
+  });
 
   const { mutate: deleteFile } = trpc.deleteFile.useMutation({
     onSuccess: () => {
@@ -94,6 +114,23 @@ const AreasDashboard = ({
 
     return matchesSearch && matchesFileType && matchesDate;
   });
+
+  useEffect(() => {
+    if (savedFiles) {
+      setSavedFileIds(savedFiles.map((file) => file.id));
+    }
+  }, [savedFiles]);
+
+  const handleSaveFile = async (fileId: string) => {
+    if (!savedFileIds.includes(fileId)) {
+      setIsSaving(true);
+      try {
+        await saveFile({ fileId });
+      } finally {
+        setIsSaving(false);
+      }
+    }
+  };
 
   return (
     <div className="flex h-screen bg-gray-100">
@@ -161,7 +198,7 @@ const AreasDashboard = ({
         </div>
 
         {/* Mostrar archivos filtrados */}
-        {isLoading ? (
+        {isLoading || isSavedFilesLoading ? (
           <Skeleton height={100} className="my-2" count={3} />
         ) : filteredFiles && filteredFiles.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -202,8 +239,8 @@ const AreasDashboard = ({
                     </div>
                   </Link>
 
-                  <div className="px-6 py-4 bg-gray-50 flex justify-between items-center">
-                    <div className="flex items-center gap-2">
+                  <div className="px-6 py-4 bg-gray-50 flex flex-col sm:flex-row justify-between items-center gap-2">
+                    <div className="flex items-center gap-2 w-full sm:w-auto">
                       <p className="text-sm text-gray-500">
                         {format(new Date(file.createdAt), "dd/MM/yyyy", {
                           locale: es,
@@ -211,28 +248,57 @@ const AreasDashboard = ({
                       </p>
                     </div>
 
-                    <Link
-                      href={file.url}
-                      download
-                      className="flex items-center text-sm text-gray-500"
-                    >
-                      <Download className="h-4 w-4 mr-1" />
-                      <span>Descargar</span>
-                    </Link>
-                    {file.uploadedBy.id === currentUserId && (
+                    <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
                       <Button
-                        onClick={() => deleteFile({ id: file.id })}
+                        onClick={() => handleSaveFile(file.id)}
                         size="sm"
-                        variant="destructive"
-                        className="px-2 py-1"
+                        variant="outline"
+                        className={`px-2 py-1 transition-colors duration-300 ${
+                          isSaving || savedFileIds.includes(file.id)
+                            ? "bg-blue-500 text-white"
+                            : "bg-white text-gray-900 hover:bg-blue-100"
+                        }`}
+                        disabled={isSaving || savedFileIds.includes(file.id)}
                       >
-                        {currentlyDeletingFile === file.id ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
+                        {savedFileIds.includes(file.id) ? (
+                          <span className="text-white">
+                            <Save className="h-4 w-4 mr-1" />
+                          </span>
                         ) : (
-                          <Trash className="h-4 w-4" />
+                          <>
+                            {isSaving ? (
+                              <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                            ) : (
+                              <Save className="h-4 w-4 mr-1" />
+                            )}
+                            {isSaving ? "Guardando..." : ""}
+                          </>
                         )}
                       </Button>
-                    )}
+
+                      <Link
+                        href={file.url}
+                        download
+                        className="flex items-center text-sm text-gray-500 bg-white hover:bg-gray-100 rounded-md px-2 py-1 transition-colors duration-300"
+                      >
+                        <Download className="h-4 w-4 mr-1" />
+                      </Link>
+
+                      {file.uploadedBy.id === currentUserId && (
+                        <Button
+                          onClick={() => deleteFile({ id: file.id })}
+                          size="sm"
+                          variant="destructive"
+                          className="px-2 py-1"
+                        >
+                          {currentlyDeletingFile === file.id ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Trash className="h-4 w-4" />
+                          )}
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))}

@@ -14,6 +14,7 @@ import {
   AreaChart,
   User2,
   Trash,
+  SaveAll,
 } from "lucide-react";
 import Link from "next/link";
 import { LogoutLink } from "@kinde-oss/kinde-auth-nextjs/components";
@@ -52,6 +53,7 @@ const SideBar: React.FC<DashboardProps> = ({ isAdmin }) => {
 
   const navItems: NavItem[] = [
     { name: "Inicio", icon: Home, href: "/dashboard" },
+    { name: "Guardado", icon: SaveAll, href: "/saved" },
     { name: "Papelera", icon: Trash, href: "/papelera" },
   ];
 

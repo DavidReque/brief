@@ -481,6 +481,79 @@ export const appRouter = router({
 
       return updatedArea;
     }),
+  addSavedFile: privateProcedure
+    .input(z.object({ fileId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const { userId } = ctx;
+
+      const savedFile = await db.savedFile.findFirst({
+        where: {
+          userId,
+          fileId: input.fileId,
+        },
+      });
+
+      if (savedFile) {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: "Este archivo ya ha sido guardado.",
+        });
+      }
+
+      const newSavedFile = await db.savedFile.create({
+        data: {
+          userId,
+          fileId: input.fileId,
+        },
+      });
+
+      return newSavedFile;
+    }),
+  removeSavedFile: privateProcedure
+    .input(z.object({ fileId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const { userId } = ctx;
+
+      const savedFile = await db.savedFile.findFirst({
+        where: {
+          userId,
+          fileId: input.fileId,
+        },
+      });
+
+      if (!savedFile) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Este archivo no ha sido guardado.",
+        });
+      }
+
+      await db.savedFile.delete({
+        where: {
+          id: savedFile.id,
+        },
+      });
+
+      return { success: true };
+    }),
+  getSavedFiles: privateProcedure.query(async ({ ctx }) => {
+    const { userId } = ctx;
+
+    const savedFiles = await db.savedFile.findMany({
+      where: { userId },
+      include: {
+        file: true,
+      },
+    });
+
+    return savedFiles.map((savedFile) => ({
+      id: savedFile.file.id,
+      name: savedFile.file.name,
+      url: savedFile.file.url,
+      createdAt: savedFile.file.createdAt,
+      fileType: savedFile.file.fileType,
+    }));
+  }),
 });
 
 export type AppRouter = typeof appRouter;

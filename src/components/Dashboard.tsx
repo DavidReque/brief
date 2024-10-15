@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { trpc } from "@/app/_trpc/client";
 import UploadButton from "./UploadButton";
 import {
@@ -10,6 +10,7 @@ import {
   Trash,
   Search,
   Calendar as CalendarIcon,
+  Save,
 } from "lucide-react";
 import Skeleton from "react-loading-skeleton";
 import Link from "next/link";
@@ -33,6 +34,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "./ui/tooltip";
+import { toast } from "./ui/use-toast";
 
 interface DashboardProps {
   isAdmin: boolean;
@@ -50,10 +52,26 @@ const Dashboard = ({ isAdmin }: DashboardProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [fileTypeFilter, setFileTypeFilter] = useState<FileType | "ALL">("ALL");
   const [dateFilter, setDateFilter] = useState<Date | undefined>(undefined);
+  const [isSaving, setIsSaving] = useState(false);
+  const [savedFileIds, setSavedFileIds] = useState<string[]>([]); // Estado para manejar los archivos guardados
 
   const [currentlyDeletingFile, setCurrentlyDeletingFile] = useState<
     string | null
   >(null);
+  const { data: savedFiles, isLoading: isSavedFilesLoading } =
+    trpc.getSavedFiles.useQuery();
+
+  const { mutate: saveFile } = trpc.addSavedFile.useMutation({
+    onSuccess: (data) => {
+      toast({
+        title: "Archivo guardado",
+        description: "El archivo se ha guardado con éxito.",
+      });
+      setSavedFileIds((prev) => [...prev, data.fileId]); // Agregar el ID del archivo guardado al estado
+      utils.getUserFiles.invalidate();
+      utils.getSavedFiles.invalidate();
+    },
+  });
 
   const utils = trpc.useUtils();
   const { data: files, isLoading } = trpc.getUserFiles.useQuery();
@@ -84,6 +102,24 @@ const Dashboard = ({ isAdmin }: DashboardProps) => {
 
     return matchesSearch && matchesFileType && matchesDate;
   });
+
+  useEffect(() => {
+    if (savedFiles) {
+      setSavedFileIds(savedFiles.map((file) => file.id));
+    }
+  }, [savedFiles]);
+
+  const handleSaveFile = async (fileId: string) => {
+    if (!savedFileIds.includes(fileId)) {
+      // Solo guarda si no está guardado
+      setIsSaving(true);
+      try {
+        await saveFile({ fileId });
+      } finally {
+        setIsSaving(false);
+      }
+    }
+  };
 
   return (
     <div className="flex h-screen bg-gray-100 overflow-hidden">
@@ -192,16 +228,40 @@ const Dashboard = ({ isAdmin }: DashboardProps) => {
                         </div>
                       </div>
                     </Link>
-                    <div className="px-6 py-4 bg-gray-50 flex justify-between items-center">
+                    <div className="px-6 py-4 bg-gray-50 flex justify-end items-center gap-x-5">
+                      <Button
+                        onClick={() => handleSaveFile(file.id)}
+                        size="sm"
+                        variant="outline"
+                        className={`px-2 py-1 transition-colors duration-300 ${
+                          isSaving || savedFileIds.includes(file.id)
+                            ? "bg-blue-500 text-white shadow-lg"
+                            : "bg-white text-gray-900 hover:bg-blue-100 hover:shadow-lg"
+                        }`}
+                        disabled={isSaving || savedFileIds.includes(file.id)}
+                      >
+                        {savedFileIds.includes(file.id) ? (
+                          <span className="text-white">
+                            <Save className="h-4 w-4 mr-1" />
+                          </span>
+                        ) : (
+                          <>
+                            {isSaving ? (
+                              <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                            ) : (
+                              <Save className="h-4 w-4 mr-1" />
+                            )}
+                            {isSaving ? "Guardando..." : ""}
+                          </>
+                        )}
+                      </Button>
                       <Link
                         href={file.url}
                         download
                         className="flex items-center text-sm text-gray-500"
                       >
                         <Download className="h-4 w-4 mr-1" />
-                        <span className="truncate max-w-[100px]">
-                          Descargar
-                        </span>
+                        <span className="truncate max-w-[100px]"></span>
                       </Link>
                       <Button
                         onClick={() => deleteFile({ id: file.id })}
@@ -219,7 +279,7 @@ const Dashboard = ({ isAdmin }: DashboardProps) => {
                   </div>
                 ))}
             </div>
-          ) : isLoading ? (
+          ) : isLoading || isSavedFilesLoading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {[...Array(6)].map((_, i) => (
                 <Skeleton key={i} height={200} className="w-full" />

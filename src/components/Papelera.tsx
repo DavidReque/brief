@@ -75,7 +75,7 @@ const Papelera = ({ isAdmin }: PropsPapelera) => {
       <SideBar isAdmin={isAdmin} />
       <div className="flex-1 p-10 mt-4">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold">Papelera</h2>
+          <h1 className="mb-3 font-bold text-5xl text-gray-900">Papelera</h1>{" "}
           {deletedFiles && deletedFiles.length > 0 && (
             <AlertDialog>
               <AlertDialogTrigger asChild>
@@ -108,8 +108,17 @@ const Papelera = ({ isAdmin }: PropsPapelera) => {
         </div>
         {isLoading ? (
           <div className="space-y-4">
-            {[...Array(3)].map((_, i) => (
-              <Skeleton key={i} height={200} className="w-full" />
+            {[...Array(5)].map((_, i) => (
+              <div
+                key={i}
+                className="flex items-center justify-between p-4 bg-white shadow rounded-lg"
+              >
+                <Skeleton height={20} width="30%" />
+                <div className="flex space-x-2">
+                  <Skeleton height={36} width={100} />
+                  <Skeleton height={36} width={150} />
+                </div>
+              </div>
             ))}
           </div>
         ) : deletedFiles && deletedFiles.length > 0 ? (

@@ -11,6 +11,7 @@ model User {
   id       String     @id @unique
   email    String     @unique
   files    File[]
+  savedFiles SavedFile[]  
   areas    UserArea[]
 }
 
@@ -32,6 +33,18 @@ model UserArea {
 
   @@unique([userId, areaId])
 }
+
+model SavedFile {
+  id        String @id @default(cuid())
+  user      User   @relation(fields: [userId], references: [id])
+  userId    String
+  file      File   @relation(fields: [fileId], references: [id])
+  fileId    String
+  createdAt DateTime @default(now())
+
+  @@unique([userId, fileId]) // Un usuario no puede guardar el mismo archivo más de una vez
+}
+
 
 enum Role {
   ADMIN
@@ -59,6 +72,7 @@ model File {
   area         Area         @relation(fields: [areaId], references: [id])
   areaId       String
   isDeleted Boolean  @default(false)
+  savedFiles   SavedFile[]
 
   @@index([userId])
   @@index([areaId])
