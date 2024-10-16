@@ -11,21 +11,24 @@ AWS.config.update({
   region: process.env.AWS_REGION,
 });
 
+// Crea una instancia de S3
 const s3 = new AWS.S3();
 
+// Maneja las solicitudes POST para subir archivos
 export async function POST(request: Request) {
   const { getUser } = getKindeServerSession();
   const user = await getUser();
 
+  // Verifica si el usuario está autenticado
   if (!user || !user.id) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
-  const formData = await request.formData(); // Usar formData directamente
+  const formData = await request.formData();
+  const file = formData.get("file") as File; // Archivo a subir
+  const areaId = formData.get("areaId") as string; // ID del área
 
-  const file = formData.get("file") as File; // Obtener el archivo
-  const areaId = formData.get("areaId") as string; // Obtener el areaId
-
+  // Validaciones
   if (!areaId || typeof areaId !== "string") {
     return NextResponse.json({ message: "Invalid area ID" }, { status: 400 });
   }
@@ -34,11 +37,9 @@ export async function POST(request: Request) {
   }
 
   try {
+    // Verifica acceso al área
     const userArea = await db.userArea.findFirst({
-      where: {
-        userId: user.id,
-        areaId: areaId,
-      },
+      where: { userId: user.id, areaId: areaId },
     });
 
     if (!userArea) {
@@ -48,18 +49,21 @@ export async function POST(request: Request) {
       );
     }
 
-    const fileContent = await file.arrayBuffer(); // Leer el contenido del archivo
+    // Prepara el archivo para la subida
+    const fileContent = await file.arrayBuffer();
     const fileName = `${user.id}/${areaId}/${Date.now()}-${file.name}`;
 
     const params = {
       Bucket: process.env.AWS_S3_BUCKET_NAME as string,
       Key: fileName,
-      Body: Buffer.from(fileContent), // Convertir el contenido a un Buffer
+      Body: Buffer.from(fileContent),
       ContentType: file.type,
     };
 
+    // Sube el archivo a S3
     const uploadResult = await s3.upload(params).promise();
 
+    // Guarda información del archivo en la base de datos
     const createdFile = await db.file.create({
       data: {
         key: fileName,
@@ -82,6 +86,7 @@ export async function POST(request: Request) {
   }
 }
 
+// Función para determinar el tipo de archivo
 function getFileType(fileName: string): "PDF" | "WORD" | "EXCEL" | "IMAGE" {
   const extension = fileName.split(".").pop()?.toLowerCase();
   switch (extension) {

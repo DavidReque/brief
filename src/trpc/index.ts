@@ -10,6 +10,7 @@ const UserRole = {
 } as const;
 
 export const appRouter = router({
+  // verica si el usuario ya existe, si no existe lo crea
   authCallback: publicProcedure.query(async () => {
     const { getUser } = getKindeServerSession();
     const user = await getUser();
@@ -24,7 +25,7 @@ export const appRouter = router({
     });
 
     if (!dbUser) {
-      // create user in db
+      // crear user en db
       await db.user.create({
         data: {
           id: user.id,
@@ -35,12 +36,14 @@ export const appRouter = router({
 
     return { success: true as const };
   }),
+  // verica el usuario este autenticado
   isAuthenticated: publicProcedure.query(async () => {
     const { getUser } = getKindeServerSession();
     const user = await getUser();
 
     return !!user;
   }),
+  // obtiene los archivos de un usuario en especifico
   getUserFiles: privateProcedure.query(async ({ ctx }) => {
     const { userId } = ctx;
 
@@ -51,6 +54,7 @@ export const appRouter = router({
       },
     });
   }),
+  // obtiene las areas de un usuario en especifico
   getUserAreas: privateProcedure.query(async ({ ctx }) => {
     const { userId } = ctx;
 
@@ -91,6 +95,7 @@ export const appRouter = router({
       })),
     }));
   }),
+  // obtiene un archivo de un usuario en especifico
   getFile: privateProcedure
     .input(z.object({ key: z.string() }))
     .mutation(async ({ ctx, input }) => {
@@ -283,7 +288,7 @@ export const appRouter = router({
 
       return { success: true };
     }),
-
+  // obtiene toodos los usuarios de la db
   getAllUsers: privateProcedure.query(async ({ ctx }) => {
     // verifica que el usuario esté autenticado
     const { userId } = ctx;
@@ -298,7 +303,6 @@ export const appRouter = router({
 
     return users;
   }),
-  // Cambios en el procedimiento tRPC
   getAreaFiles: privateProcedure
     .input(z.object({ areaId: z.string() }))
     .query(async ({ ctx, input }) => {
@@ -402,6 +406,7 @@ export const appRouter = router({
 
       return file;
     }),
+  // elimina todos los archivos de la papelera
   deleteAllFiles: privateProcedure.mutation(async ({ ctx }) => {
     const { userId } = ctx;
 
@@ -412,6 +417,7 @@ export const appRouter = router({
       },
     });
   }),
+  // edita el area especificada
   editArea: privateProcedure
     .input(
       z.object({
@@ -481,6 +487,7 @@ export const appRouter = router({
 
       return updatedArea;
     }),
+  // agrega archivos guardados
   addSavedFile: privateProcedure
     .input(z.object({ fileId: z.string() }))
     .mutation(async ({ ctx, input }) => {
@@ -509,6 +516,7 @@ export const appRouter = router({
 
       return newSavedFile;
     }),
+  // elimina archivos guardados
   removeSavedFile: privateProcedure
     .input(z.object({ fileId: z.string() }))
     .mutation(async ({ ctx, input }) => {
@@ -536,6 +544,7 @@ export const appRouter = router({
 
       return { success: true };
     }),
+  // obtiene archivos guardados
   getSavedFiles: privateProcedure.query(async ({ ctx }) => {
     const { userId } = ctx;
 

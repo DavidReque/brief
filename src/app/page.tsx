@@ -7,6 +7,7 @@ import { ArrowBigRight } from "lucide-react";
 import Link from "next/link";
 
 // TODO: Mejorar para dispositivos moviles
+// Pagina de inicio
 
 export default async function Home() {
   const { getUser } = getKindeServerSession();

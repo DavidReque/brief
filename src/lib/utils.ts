@@ -14,8 +14,8 @@ export function absoluteUrl(path: string) {
 }
 
 export function constructMetadata({
-  title = "Quill - the SaaS for students",
-  description = "Quill is an open-source software to make chatting to your PDF files easy.",
+  title = "Gestion de archivos",
+  description = "La manera mas facil de proteger y guardar archivos",
   image = "/thumbnail.png",
   icons = "/favicon.ico",
   noIndex = false,
@@ -43,7 +43,7 @@ export function constructMetadata({
       title,
       description,
       images: [image],
-      creator: "@david",
+      creator: "@",
     },
     icons,
     metadataBase: new URL("https://gestion-phi.vercel.app/"),
@@ -57,6 +57,7 @@ export function constructMetadata({
   };
 }
 
+// Verifica si ya existe un usuario, si no existe lo crea
 export async function verifyOrCreateUser(userId: string, email: string) {
   try {
     const user = await db.user.upsert({

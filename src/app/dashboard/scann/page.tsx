@@ -4,9 +4,11 @@ import { db } from "@/db";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 
 const Page = async () => {
+  // Obtiene el usuario de la sesión
   const { getUser } = getKindeServerSession();
   const user = await getUser();
 
+  // Verifica si el usuario tiene rol de ADMIN
   const adminArea = await db.userArea.findFirst({
     where: {
       userId: user?.id,
@@ -16,6 +18,7 @@ const Page = async () => {
 
   const isAdmin = !!adminArea; // Convert to boolean
 
+  // Renderiza el componente PDFGeneratorUploader, pasando el estado de admin
   return <PDFGeneratorUploader isAdmin={isAdmin} />;
 };
 
