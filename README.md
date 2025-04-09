@@ -24,18 +24,14 @@ _Area administration panel with user management_
 ### Document Generation
 
 ![Document Generation](public/images/doc-generation.png)
-_Automatic document generation from uploaded images_
 
 ![Document Generation](public/images/doc-generation2.png)
-_Automatic document generation from uploaded images_
 
 ![Document Generation](public/images/doc-generation3.png)
-_Automatic document generation from uploaded images_
 
 ### Document Preview
 
 ![Document Generation](public/images/document-preview.png)
-_Automatic document generation from uploaded images_
 
 ## ✨ Key Features
 
