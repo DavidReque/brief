@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Screenshot Generator</title>
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+        margin: 0;
+        padding: 20px;
+        background: #f5f5f5;
+      }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+      .screenshot {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .dashboard {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+      }
+      .card {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 6px;
+      }
+      .file-management {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 20px;
+      }
+      .area-admin {
+        display: grid;
+        grid-template-columns: 1fr 2fr;
+        gap: 20px;
+      }
+      .doc-generation {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+      }
+      .button {
+        background: #0070f3;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 4px;
+        border: none;
+        cursor: pointer;
+      }
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Dashboard Screenshot -->
+      <div class="screenshot" id="dashboard">
+        <div class="header">
+          <h2>Dashboard</h2>
+          <button class="button">New File</button>
+        </div>
+        <div class="dashboard">
+          <div class="card">
+            <h3>Recent Files</h3>
+            <p>5 new files today</p>
+          </div>
+          <div class="card">
+            <h3>Storage Usage</h3>
+            <p>75% used</p>
+          </div>
+          <div class="card">
+            <h3>Active Users</h3>
+            <p>12 online</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- File Management Screenshot -->
+      <div class="screenshot" id="file-management">
+        <div class="header">
+          <h2>File Management</h2>
+          <button class="button">Upload</button>
+        </div>
+        <div class="file-management">
+          <div class="card">
+            <h3>Files</h3>
+            <p>Drag and drop files here</p>
+          </div>
+          <div class="card">
+            <h3>Recent Uploads</h3>
+            <p>No recent uploads</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Area Administration Screenshot -->
+      <div class="screenshot" id="area-admin">
+        <div class="header">
+          <h2>Area Administration</h2>
+          <button class="button">Add User</button>
+        </div>
+        <div class="area-admin">
+          <div class="card">
+            <h3>Areas</h3>
+            <p>Select an area</p>
+          </div>
+          <div class="card">
+            <h3>Users</h3>
+            <p>Manage users</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Document Generation Screenshot -->
+      <div class="screenshot" id="doc-generation">
+        <div class="header">
+          <h2>Document Generation</h2>
+          <button class="button">Generate</button>
+        </div>
+        <div class="doc-generation">
+          <div class="card">
+            <h3>Upload Images</h3>
+            <p>Drop images here</p>
+          </div>
+          <div class="card">
+            <h3>Preview</h3>
+            <p>Document preview</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

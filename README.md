@@ -4,6 +4,39 @@
 
 Enterprise document management system that enables organization and control of files by departmental areas. Implements a robust access control system, cloud file management, and automatic document generation.
 
+## 📸 Screenshots
+
+### Dashboard
+
+![Dashboard](public/images/dashboard.png)
+_Main dashboard showing area overview and recent files_
+
+### File Management
+
+![File Management](public/images/file-management.png)
+_Advanced file management interface with drag-and-drop support_
+
+### Areas
+
+![Area Administration](public/images/areas.png)
+_Area administration panel with user management_
+
+### Document Generation
+
+![Document Generation](public/images/doc-generation.png)
+_Automatic document generation from uploaded images_
+
+![Document Generation](public/images/doc-generation2.png)
+_Automatic document generation from uploaded images_
+
+![Document Generation](public/images/doc-generation3.png)
+_Automatic document generation from uploaded images_
+
+### Document Preview
+
+![Document Generation](public/images/document-preview.png)
+_Automatic document generation from uploaded images_
+
 ## ✨ Key Features
 
 - 🔐 **Granular Access Control**
@@ -86,17 +119,6 @@ Enterprise document management system that enables organization and control of f
    ```bash
    pnpm dev
    ```
-
-## 📚 Project Structure
-
-```
-src/
-├── app/          # Next.js routes and pages
-├── components/   # Reusable components
-├── trpc/         # Type-safe APIs with tRPC
-├── lib/          # Utilities and configurations
-└── db/           # Prisma configuration
-```
 
 ## 🔒 Security
 
